@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="es" class="theme-light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Espacio Querido — Mockup cockpit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '.theme-dark'],
+      theme: {
+        extend: {
+          colors: {
+            page: 'var(--page)', card: 'var(--card)', elevated: 'var(--elevated)',
+            'table-header': 'var(--table-header)', border: 'var(--border)',
+            text: 'var(--text)', muted: 'var(--muted)',
+            accent: 'var(--accent-view)',
+            'side-bg': 'var(--side-bg)', 'side-text': 'var(--side-text)',
+            'side-muted': 'var(--side-muted)',
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'Segoe UI', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    :root {
+      --page:#f4f6f9; --card:#ffffff; --elevated:#eef1f6; --table-header:#eef1f6;
+      --border:#e3e7ee; --text:#111827; --muted:#6b7280;
+      --side-bg:#17181d; --side-text:#d9dbe1; --side-muted:#82868f;
+      --side-active-bg:rgba(255,255,255,.06);
+      /* acentos por vista */
+      --accent-operativa:#4f46e5; --accent-admin:#8a1c3b; --accent-developer:#7c3aed;
+      --accent-view:var(--accent-operativa);
+    }
+    .theme-dark {
+      --page:#0f1116; --card:#171a21; --elevated:#1e222b; --table-header:#1e222b;
+      --border:#262b36; --text:#e6e8ee; --muted:#9aa1ad;
+      --side-bg:#121317; --side-text:#d9dbe1; --side-muted:#7c828d;
+      --side-active-bg:rgba(255,255,255,.05);
+    }
+    body { background:var(--page); color:var(--text); }
+    [x-cloak]{ display:none !important; }
+    .accent-band{ background:var(--accent-view); }
+    ::-webkit-scrollbar{ height:8px; width:8px; }
+    ::-webkit-scrollbar-thumb{ background:var(--border); border-radius:8px; }
+  </style>
+</head>
+<body class="font-sans antialiased"
+      x-data="cockpit()" :class="dark ? '' : ''">
+
+  <!-- ================= SHELL ================= -->
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="hidden md:flex md:flex-col w-64 shrink-0 text-side-text"
+           style="background:var(--side-bg)">
+      <!-- brand -->
+      <div class="h-16 flex items-center gap-3 px-5 border-b border-white/10">
+        <div class="h-9 w-9 rounded-xl grid place-items-center text-white font-bold"
+             style="background:var(--accent-view)">EQ</div>
+        <div class="leading-tight">
+          <div class="font-semibold text-white text-[15px]">Espacio Querido</div>
+          <div class="text-[11px] text-side-muted">Correduría · MONTERREY1</div>
+        </div>
+      </div>
+
+      <!-- nav -->
+      <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-6 text-[13px]">
+        <template x-for="group in nav" :key="group.title">
+          <div>
+            <div class="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-side-muted"
+                 x-text="group.title"></div>
+            <div class="space-y-0.5">
+              <template x-for="item in group.items" :key="item.label">
+                <a href="#" @click.prevent="active=item.label"
+                   class="flex items-center gap-3 px-2.5 py-2 rounded-lg transition-colors"
+                   :class="active===item.label ? 'text-white' : 'text-side-text hover:bg-white/5'"
+                   :style="active===item.label ? 'background:var(--side-active-bg)' : ''">
+                  <span class="shrink-0 opacity-90" x-html="icons[item.icon]"></span>
+                  <span x-text="item.label"></span>
+                  <span x-show="item.badge"
+                        class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full text-white"
+                        style="background:var(--accent-view)" x-text="item.badge"></span>
+                </a>
+              </template>
+            </div>
+          </div>
+        </template>
+      </nav>
+
+      <!-- footer powered by -->
+      <div class="px-5 py-4 border-t border-white/10 text-side-muted text-[11px] leading-relaxed">
+        <div class="flex items-center gap-2 text-side-text">
+          <span class="h-5 w-5 rounded grid place-items-center bg-white/10 text-[10px] font-bold">L</span>
+          <span>Powered by <b class="font-semibold">LogiQ</b></span>
+        </div>
+        <div class="mt-0.5">Monterrey, NL · v1.2.0</div>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN COLUMN ============ -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- topbar -->
+      <header class="h-16 shrink-0 bg-card border-b border-border flex items-center gap-3 px-4 sm:px-6">
+        <!-- scope selector (izquierda) -->
+        <div class="relative" x-data="{open:false}">
+          <button @click="open=!open"
+                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-elevated text-sm">
+            <span class="text-muted" x-html="icons.building"></span>
+            <span x-text="scope"></span>
+            <span class="text-muted" x-html="icons.chevron"></span>
+          </button>
+          <div x-show="open" x-cloak @click.outside="open=false"
+               class="absolute z-30 mt-1 w-60 rounded-xl border border-border bg-card shadow-lg p-1 text-sm">
+            <template x-for="s in scopes" :key="s">
+              <button @click="scope=s;open=false"
+                      class="w-full text-left px-3 py-2 rounded-lg hover:bg-elevated"
+                      :class="scope===s ? 'text-accent font-medium' : ''" x-text="s"></button>
+            </template>
+            <div class="px-3 pt-1 text-[11px] text-muted">Solo Region/Admin ven este selector</div>
+          </div>
+        </div>
+
+        <div class="hidden lg:block text-sm text-muted">/ Pipeline</div>
+
+        <div class="ml-auto flex items-center gap-1.5">
+          <!-- view chips -->
+          <div class="hidden sm:flex items-center gap-1 mr-2 p-1 rounded-xl bg-elevated">
+            <template x-for="v in views" :key="v.key">
+              <button @click="setView(v)"
+                      class="px-2.5 py-1 rounded-lg text-[12px] font-medium transition"
+                      :class="view.key===v.key ? 'text-white shadow-sm' : 'text-muted hover:text-text'"
+                      :style="view.key===v.key ? 'background:'+v.color : ''"
+                      x-text="v.label"></button>
+            </template>
+          </div>
+          <!-- icon buttons -->
+          <button class="h-9 w-9 grid place-items-center rounded-lg hover:bg-elevated text-muted" x-html="icons.info"></button>
+          <button class="h-9 w-9 grid place-items-center rounded-lg hover:bg-elevated text-muted relative">
+            <span x-html="icons.bell"></span>
+            <span class="absolute top-2 right-2 h-1.5 w-1.5 rounded-full" style="background:var(--accent-view)"></span>
+          </button>
+          <button @click="toggleLang" class="h-9 px-2 grid place-items-center rounded-lg hover:bg-elevated text-muted text-xs font-semibold" x-text="lang"></button>
+          <button @click="toggleTheme" class="h-9 w-9 grid place-items-center rounded-lg hover:bg-elevated text-muted">
+            <span x-show="!dark" x-html="icons.moon"></span>
+            <span x-show="dark" x-cloak x-html="icons.sun"></span>
+          </button>
+          <div class="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-semibold ml-1"
+               style="background:var(--accent-view)">OE</div>
+        </div>
+      </header>
+
+      <!-- accent band (identifica la vista) -->
+      <div class="h-1 accent-band"></div>
+
+      <!-- ============ CONTENT ============ -->
+      <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
+
+        <!-- page header -->
+        <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+          <div>
+            <h1 class="text-xl font-semibold">Pipeline</h1>
+            <p class="text-sm text-muted">El estado del negocio de un vistazo · <span x-text="view.label + ' view'"></span></p>
+          </div>
+          <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium"
+                  style="background:var(--accent-view)">
+            <span x-html="icons.plus"></span> Nueva operación
+          </button>
+        </div>
+
+        <!-- KPI strip -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+          <template x-for="k in kpis" :key="k.label">
+            <div class="bg-card border border-border rounded-2xl p-4">
+              <div class="text-[12px] text-muted" x-text="k.label"></div>
+              <div class="text-2xl font-semibold mt-1" x-text="k.value"></div>
+              <div class="text-[11px] mt-1" :class="k.up ? 'text-emerald-500' : 'text-muted'" x-text="k.delta"></div>
+            </div>
+          </template>
+        </div>
+
+        <!-- Por aprobar -->
+        <div class="bg-card border border-border rounded-2xl p-4 mb-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="h-6 w-6 grid place-items-center rounded-lg text-white text-xs" style="background:var(--accent-view)" x-html="icons.spark"></span>
+            <span class="font-medium text-sm">Por aprobar</span>
+            <span class="text-xs text-muted">La IA propone · el humano decide</span>
+            <span class="ml-auto text-[11px] px-2 py-0.5 rounded-full bg-elevated text-muted">3 pendientes</span>
+          </div>
+          <div class="grid md:grid-cols-3 gap-3">
+            <template x-for="a in aprobaciones" :key="a.title">
+              <div class="border border-border rounded-xl p-3 bg-elevated/40">
+                <div class="text-[13px] font-medium" x-text="a.title"></div>
+                <div class="text-[12px] text-muted mt-0.5 mb-2" x-text="a.desc"></div>
+                <div class="flex gap-2">
+                  <button class="text-[12px] px-2.5 py-1 rounded-lg text-white" style="background:var(--accent-view)">Aprobar</button>
+                  <button class="text-[12px] px-2.5 py-1 rounded-lg border border-border hover:bg-card">Rechazar</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Kanban -->
+        <div class="flex gap-4 overflow-x-auto pb-4">
+          <template x-for="col in columns" :key="col.name">
+            <div class="w-72 shrink-0">
+              <div class="flex items-center gap-2 mb-2 px-1">
+                <span class="h-2 w-2 rounded-full" :style="'background:'+col.dot"></span>
+                <span class="text-[13px] font-medium" x-text="col.name"></span>
+                <span class="text-[11px] text-muted" x-text="col.cards.length"></span>
+              </div>
+              <div class="space-y-2.5">
+                <template x-for="c in col.cards" :key="c.nombre">
+                  <button @click="openOp(c)"
+                          class="w-full text-left bg-card border border-border rounded-xl p-3 hover:border-accent transition">
+                    <div class="flex items-start justify-between gap-2">
+                      <span class="text-[13px] font-medium" x-text="c.nombre"></span>
+                      <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                            :class="gradoClass(c.grado)" x-text="c.grado"></span>
+                    </div>
+                    <div class="text-[11px] text-muted mt-0.5" x-text="c.busca"></div>
+                    <div class="flex items-center gap-1.5 mt-2.5">
+                      <span class="text-[10px] px-1.5 py-0.5 rounded-full" :class="tempClass(c.temp)" x-text="tempLabel(c.temp)"></span>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-elevated text-muted" x-text="c.fuente"></span>
+                      <span class="ml-auto text-[10px] text-muted" x-text="c.asesor"></span>
+                    </div>
+                  </button>
+                </template>
+                <div x-show="col.cards.length===0" class="text-[12px] text-muted border border-dashed border-border rounded-xl p-4 text-center">
+                  Sin operaciones
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ DRAWER: Detalle de operación ============ -->
+  <div x-show="op" x-cloak class="fixed inset-0 z-40" @keydown.escape.window="op=null">
+    <div class="absolute inset-0 bg-black/40" @click="op=null"></div>
+    <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-card border-l border-border shadow-2xl flex flex-col"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0">
+      <template x-if="op">
+        <div class="flex flex-col h-full">
+          <!-- header -->
+          <div class="h-16 shrink-0 flex items-center gap-3 px-5 border-b border-border">
+            <div>
+              <div class="font-semibold" x-text="op.nombre"></div>
+              <div class="text-[12px] text-muted" x-text="op.busca"></div>
+            </div>
+            <button @click="op=null" class="ml-auto h-9 w-9 grid place-items-center rounded-lg hover:bg-elevated text-muted" x-html="icons.close"></button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-5 space-y-5">
+            <!-- copiloto -->
+            <div class="rounded-xl p-3.5 border border-border" style="background:color-mix(in srgb, var(--accent-view) 8%, transparent)">
+              <div class="flex items-center gap-2 text-[12px] font-medium mb-1">
+                <span x-html="icons.spark" style="color:var(--accent-view)"></span> Sugerencia del copiloto
+              </div>
+              <p class="text-[13px] text-muted">Lead <b class="text-text">caliente</b> y bien calificado. Conviene <b class="text-text">agendar cita hoy</b> y mandar 2 propiedades del match superior al 85%.</p>
+            </div>
+
+            <!-- scoring dos ejes -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="border border-border rounded-xl p-3">
+                <div class="text-[11px] text-muted">Calificación (fit)</div>
+                <div class="flex items-baseline gap-2 mt-1">
+                  <span class="text-2xl font-bold" x-text="op.grado"></span>
+                  <span class="text-sm text-muted" x-text="op.score + '/100'"></span>
+                </div>
+              </div>
+              <div class="border border-border rounded-xl p-3">
+                <div class="text-[11px] text-muted">Temperatura</div>
+                <div class="mt-2">
+                  <span class="text-[12px] px-2 py-1 rounded-full" :class="tempClass(op.temp)" x-text="tempLabel(op.temp)"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- BANT -->
+            <div>
+              <div class="text-[12px] font-medium mb-2">Desglose BANT</div>
+              <div class="space-y-2">
+                <template x-for="b in op.bant" :key="b.k">
+                  <div>
+                    <div class="flex justify-between text-[11px] text-muted mb-1">
+                      <span x-text="b.k"></span><span x-text="b.v + '%'"></span>
+                    </div>
+                    <div class="h-1.5 rounded-full bg-elevated overflow-hidden">
+                      <div class="h-full rounded-full" :style="'width:'+b.v+'%;background:var(--accent-view)'"></div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- siguiente acción -->
+            <div class="border border-border rounded-xl p-3.5">
+              <div class="text-[12px] text-muted mb-1">Siguiente acción</div>
+              <div class="text-[14px] font-medium">📅 Agendar cita — hoy 5:00 pm</div>
+              <button class="mt-2 text-[12px] px-2.5 py-1 rounded-lg text-white" style="background:var(--accent-view)">Confirmar con asesor</button>
+            </div>
+
+            <!-- propiedades -->
+            <div>
+              <div class="text-[12px] font-medium mb-2">Propiedades sugeridas</div>
+              <div class="space-y-2">
+                <template x-for="p in op.props" :key="p.nombre">
+                  <div class="flex items-center gap-3 border border-border rounded-xl p-2.5">
+                    <div class="h-10 w-10 rounded-lg bg-elevated grid place-items-center text-muted" x-html="icons.home"></div>
+                    <div class="min-w-0">
+                      <div class="text-[13px] font-medium truncate" x-text="p.nombre"></div>
+                      <div class="text-[11px] text-muted" x-text="p.zona"></div>
+                    </div>
+                    <span class="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                          style="color:var(--accent-view);background:color-mix(in srgb, var(--accent-view) 12%, transparent)"
+                          x-text="p.match + '% match'"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- actividad -->
+            <div>
+              <div class="text-[12px] font-medium mb-2">Actividad y trazabilidad</div>
+              <div class="text-[12px] text-muted space-y-1.5">
+                <div>• Fuente: <b class="text-text" x-text="op.fuente"></b> · id EB-4471</div>
+                <div>• Asesor: <b class="text-text" x-text="op.asesor"></b></div>
+                <div>• Recalificado hace 2 h por el Calificador IA</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="shrink-0 p-4 border-t border-border flex gap-2">
+            <button class="flex-1 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">Guardar</button>
+            <button class="px-4 py-2 rounded-lg border border-border text-sm hover:bg-elevated">Descartar</button>
+          </div>
+        </div>
+      </template>
+    </aside>
+  </div>
+
+  <!-- banner de contexto del mockup -->
+  <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 text-[11px] px-3 py-1.5 rounded-full bg-black/75 text-white/90">
+    Mockup · usa los chips de vista (arriba der.) para ver el acento Admin (guindo) y Developer (morado)
+  </div>
+
+  <script>
+    function cockpit() {
+      return {
+        dark:false, lang:'ES', active:'Pipeline', op:null,
+        scope:'MONTERREY1', scopes:['Región Norte (todas)','MONTERREY1','SALTILLO2','All'],
+        views:[
+          {key:'agencia',label:'Agencia',color:'var(--accent-operativa)'},
+          {key:'region',label:'Region',color:'var(--accent-operativa)'},
+          {key:'admin',label:'Admin',color:'var(--accent-admin)'},
+          {key:'developer',label:'Developer',color:'var(--accent-developer)'},
+        ],
+        view:{key:'agencia',label:'Agencia',color:'var(--accent-operativa)'},
+        setView(v){ this.view=v; document.documentElement.style.setProperty('--accent-view', v.color); },
+        toggleTheme(){ this.dark=!this.dark; document.documentElement.classList.toggle('theme-dark', this.dark); document.documentElement.classList.toggle('theme-light', !this.dark); },
+        toggleLang(){ this.lang = this.lang==='ES' ? 'EN' : 'ES'; },
+        openOp(c){ this.op = { ...c, score:82, bant:[{k:'Presupuesto',v:80},{k:'Financiamiento / decisor',v:75},{k:'Necesidad / zona',v:90},{k:'Horizonte de tiempo',v:70}], props:[{nombre:'Depto. Valle Poniente 2R',zona:'San Pedro',match:92},{nombre:'Casa Cumbres Élite',zona:'Cumbres',match:87}] }; },
+        gradoClass(g){ return {A:'bg-emerald-100 text-emerald-700', B:'bg-amber-100 text-amber-700', C:'bg-rose-100 text-rose-700'}[g]; },
+        tempLabel(t){ return {caliente:'🔥 Caliente',tibio:'Tibio',frio:'Frío'}[t]; },
+        tempClass(t){ return {caliente:'bg-rose-100 text-rose-700',tibio:'bg-amber-100 text-amber-700',frio:'bg-sky-100 text-sky-700'}[t]; },
+        kpis:[
+          {label:'Operaciones activas',value:'48',delta:'+6 esta semana',up:true},
+          {label:'Por aprobar (IA)',value:'3',delta:'requieren decisión',up:false},
+          {label:'Citas esta semana',value:'12',delta:'+3 vs anterior',up:true},
+          {label:'Cierres del mes',value:'7',delta:'meta: 10',up:false},
+          {label:'Comisión proyectada',value:'$284k',delta:'+18%',up:true},
+        ],
+        aprobaciones:[
+          {title:'Responder a Laura M.',desc:'Respuesta sugerida (confianza 92%) por WhatsApp.'},
+          {title:'Agendar a Carlos R.',desc:'Scheduler propone cita mañana 11:00 am.'},
+          {title:'Nutrir a Diego S.',desc:'Love Bomber quiere enviar 2 propiedades.'},
+        ],
+        nav:[
+          {title:'Operación',items:[
+            {label:'Pipeline',icon:'board',badge:''},
+            {label:'Leads',icon:'users'},
+            {label:'Conversaciones',icon:'chat',badge:'5'},
+            {label:'Libros',icon:'book'},
+          ]},
+          {title:'Analítica',items:[
+            {label:'Ventas',icon:'chart'},
+            {label:'Team performance',icon:'gauge'},
+            {label:'Funnel',icon:'funnel'},
+          ]},
+          {title:'Automatizaciones + IA',items:[
+            {label:'Agentes IA',icon:'spark'},
+          ]},
+          {title:'Sistema operativo',items:[
+            {label:'Money Monday',icon:'calendar'},
+            {label:'1:1',icon:'user'},
+          ]},
+          {title:'Administración',items:[
+            {label:'Asesores',icon:'id'},
+            {label:'Configuración',icon:'cog'},
+          ]},
+        ],
+        columns:[
+          {name:'Nuevos',dot:'#94a3b8',cards:[
+            {nombre:'Laura Mendoza',busca:'Depto 2 rec · San Pedro',grado:'A',temp:'caliente',fuente:'WhatsApp',asesor:'A. Ríos'},
+            {nombre:'Diego Salas',busca:'Casa · Cumbres',grado:'B',temp:'tibio',fuente:'Meta Ads',asesor:'M. Luna'},
+          ]},
+          {name:'Calificados',dot:'#6366f1',cards:[
+            {nombre:'Carlos Reyna',busca:'Depto inversión · Centro',grado:'A',temp:'caliente',fuente:'EasyBroker',asesor:'A. Ríos'},
+            {nombre:'Paola Cantú',busca:'Casa 3 rec · Carza',grado:'C',temp:'frio',fuente:'Referido',asesor:'J. Vega'},
+          ]},
+          {name:'Citas',dot:'#0ea5e9',cards:[
+            {nombre:'Familia Treviño',busca:'Casa · Valle Alto',grado:'A',temp:'caliente',fuente:'WhatsApp',asesor:'M. Luna'},
+          ]},
+          {name:'Negociación',dot:'#f59e0b',cards:[
+            {nombre:'Roberto Gil',busca:'Depto · Tec',grado:'B',temp:'tibio',fuente:'EasyBroker',asesor:'J. Vega'},
+          ]},
+          {name:'Cierre',dot:'#10b981',cards:[
+            {nombre:'Sofía Marín',busca:'Casa · Cumbres',grado:'A',temp:'caliente',fuente:'Referido',asesor:'A. Ríos'},
+          ]},
+          {name:'Reactivación',dot:'#a78bfa',cards:[
+            {nombre:'Hugo Peña',busca:'Depto · San Jerónimo',grado:'C',temp:'frio',fuente:'Meta Ads',asesor:'M. Luna'},
+          ]},
+        ],
+        icons:{
+          board:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="11" rx="1"/></svg>',
+          users:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0M16 6a3 3 0 010 6M21 20a6 6 0 00-4-5.7"/></svg>',
+          chat:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 3z"/></svg>',
+          book:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/></svg>',
+          chart:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+          gauge:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 13l4-3M4 18a8 8 0 1116 0"/></svg>',
+          funnel:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg>',
+          spark:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>',
+          calendar:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>',
+          user:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0114 0"/></svg>',
+          id:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M13 10h5M13 14h5"/></svg>',
+          cog:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+          info:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+          bell:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M6 9a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6M10 20a2 2 0 004 0"/></svg>',
+          moon:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M21 12.8A8 8 0 1111 3a6 6 0 0010 9z"/></svg>',
+          sun:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>',
+          building:'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2"/></svg>',
+          chevron:'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+          plus:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+          close:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+          home:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg>',
+        },
+      };
+    }
+  </script>
+</body>
+</html>

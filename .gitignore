@@ -1,0 +1,27 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+.venv/
+venv/
+env/
+*.log
+staticfiles/
+media/
+
+# Node / Tailwind build
+node_modules/
+theme/static/
+.parcel-cache/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
