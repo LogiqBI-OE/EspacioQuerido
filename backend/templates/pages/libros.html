@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+    <p class="text-sm text-muted">{{ page_subtitle }}</p>
+  </div>
+  <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Agregar operación
+  </button>
+</div>
+
+<div class="bg-card border border-border rounded-2xl" x-data="{tab:'comisiones'}">
+  <!-- tabs -->
+  <div class="flex gap-1 px-3 pt-3 border-b border-border">
+    <button @click="tab='comisiones'" class="px-3 py-2 text-sm rounded-t-lg" :class="tab==='comisiones' ? 'font-medium border-b-2' : 'text-muted'" :style="tab==='comisiones' ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''">Libro de comisiones</button>
+    <button @click="tab='objetivos'" class="px-3 py-2 text-sm rounded-t-lg" :class="tab==='objetivos' ? 'font-medium border-b-2' : 'text-muted'" :style="tab==='objetivos' ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''">Objetivos</button>
+  </div>
+
+  <!-- Libro de comisiones -->
+  <div x-show="tab==='comisiones'" class="p-3 overflow-x-auto">
+    <table class="w-full text-sm min-w-[980px]">
+      <thead class="bg-table-header border-b border-border text-muted text-left text-[11px] uppercase tracking-wide">
+        <tr>
+          <th class="px-3 py-2 font-medium">Asesor</th>
+          <th class="px-3 py-2 font-medium">Contrato</th>
+          <th class="px-3 py-2 font-medium">Op</th>
+          <th class="px-3 py-2 font-medium">Cliente</th>
+          <th class="px-3 py-2 font-medium">Propiedad</th>
+          <th class="px-3 py-2 font-medium">Municipio</th>
+          <th class="px-3 py-2 font-medium">Fecha venta</th>
+          <th class="px-3 py-2 font-medium">Fecha cobro</th>
+          <th class="px-3 py-2 font-medium text-right">Venta</th>
+          <th class="px-3 py-2 font-medium text-right">Com. total</th>
+          <th class="px-3 py-2 font-medium text-right">→ Asesor</th>
+          <th class="px-3 py-2 font-medium text-right">→ EQ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in libro %}
+          <tr class="border-b border-border last:border-0 hover:bg-elevated whitespace-nowrap">
+            <td class="px-3 py-2.5 font-medium">{{ r.asesor }}</td>
+            <td class="px-3 py-2.5 text-muted">{{ r.contrato }}</td>
+            <td class="px-3 py-2.5">{{ r.op }}</td>
+            <td class="px-3 py-2.5">{{ r.cliente }}</td>
+            <td class="px-3 py-2.5">{{ r.propiedad }}</td>
+            <td class="px-3 py-2.5 text-muted">{{ r.municipio }}</td>
+            <td class="px-3 py-2.5 text-muted">{{ r.fecha_venta }}</td>
+            <td class="px-3 py-2.5 text-muted">{{ r.fecha_cobro }}</td>
+            <td class="px-3 py-2.5 text-right">{{ r.venta }}</td>
+            <td class="px-3 py-2.5 text-right font-medium">{{ r.com_total }}</td>
+            <td class="px-3 py-2.5 text-right text-emerald-600">{{ r.com_asesor }}</td>
+            <td class="px-3 py-2.5 text-right text-muted">{{ r.com_eq }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="text-[11px] text-muted mt-2">Cada cambio de etapa queda registrado (timestamp); se conservan la fecha oficial de venta y de cobro. Reparto: asesor / EQ-agencia / coordinador.</p>
+  </div>
+
+  <!-- Objetivos -->
+  <div x-show="tab==='objetivos'" x-cloak class="p-3">
+    <table class="w-full text-sm">
+      <thead class="bg-table-header border-b border-border text-muted text-left text-[11px] uppercase tracking-wide">
+        <tr>
+          <th class="px-3 py-2 font-medium">Asesor</th>
+          <th class="px-3 py-2 font-medium text-right">Meta</th>
+          <th class="px-3 py-2 font-medium text-right">Avance</th>
+          <th class="px-3 py-2 font-medium w-1/3">Cumplimiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in objetivos %}
+          <tr class="border-b border-border last:border-0">
+            <td class="px-3 py-3 font-medium">{{ o.asesor }}</td>
+            <td class="px-3 py-3 text-right text-muted">{{ o.meta }}</td>
+            <td class="px-3 py-3 text-right">{{ o.avance }}</td>
+            <td class="px-3 py-3">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-2 rounded-full bg-elevated overflow-hidden">
+                  <div class="h-full rounded-full" style="width:{{ o.pct }}%; background:var(--accent-view)"></div>
+                </div>
+                <span class="text-xs text-muted w-9 text-right">{{ o.pct }}%</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

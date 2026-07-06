@@ -1,0 +1,39 @@
+{% comment %} Contenido del sidebar (reusado en desktop y drawer móvil). {% endcomment %}
+<!-- brand -->
+<div class="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
+  <div class="h-9 w-9 rounded-xl grid place-items-center text-white font-bold" style="background:var(--accent-view)">{{ brand.sigla }}</div>
+  <div class="leading-tight">
+    <div class="font-semibold text-white text-[15px]">{{ brand.nombre }}</div>
+    <div class="text-[11px] text-side-muted">Correduría · {{ brand.tenant }}</div>
+  </div>
+</div>
+
+<!-- nav -->
+<nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-4 space-y-6 text-[13px]">
+  {% for group in nav_groups %}
+    <div>
+      <div class="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-side-muted">{{ group.title }}</div>
+      <div class="space-y-0.5">
+        {% for item in group.items %}
+          {% url item.url as item_url %}
+          <a href="{{ item_url }}"
+             class="flex items-center gap-3 px-2.5 py-2 rounded-lg transition-colors {% if request.resolver_match.url_name == item.url %}text-white{% else %}text-side-text hover:bg-white/5{% endif %}"
+             {% if request.resolver_match.url_name == item.url %}style="background:var(--side-active-bg)"{% endif %}>
+            <span class="shrink-0 opacity-90">{{ item.icon|safe }}</span>
+            <span>{{ item.label }}</span>
+            {% if item.badge %}<span class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full text-white" style="background:var(--accent-view)">{{ item.badge }}</span>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</nav>
+
+<!-- footer powered by -->
+<div class="px-5 py-4 border-t border-white/10 text-side-muted text-[11px] leading-relaxed shrink-0">
+  <div class="flex items-center gap-2 text-side-text">
+    <span class="h-5 w-5 rounded grid place-items-center bg-white/10 text-[10px] font-bold">{{ developer_info.sigla }}</span>
+    <span>Powered by <b class="font-semibold">{{ developer_info.empresa }}</b></span>
+  </div>
+  <div class="mt-0.5">{{ developer_info.origen }} · v{{ developer_info.version }}</div>
+</div>

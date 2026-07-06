@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div x-data="{step: 'inicio'}">
+
+  <!-- ===== Paso 1: Nuevo reporte — elige asesor ===== -->
+  <div class="bg-card border border-border rounded-2xl p-4 mb-4">
+    <div class="flex flex-wrap items-end gap-3">
+      <div>
+        <div class="text-sm font-medium">Nuevo reporte 1:1</div>
+        <div class="text-[12px] text-muted">Elige al asesor y el periodo; los insights se calculan solos.</div>
+      </div>
+      <div class="ml-auto flex items-end gap-2">
+        <div>
+          <label class="text-[10px] uppercase tracking-wide text-muted">Asesor</label>
+          <select class="mt-0.5 text-sm rounded-lg bg-elevated/60 border border-border px-3 py-2">
+            {% for a in asesores %}<option>{{ a }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] uppercase tracking-wide text-muted">Periodo</label>
+          <select class="mt-0.5 text-sm rounded-lg bg-elevated/60 border border-border px-3 py-2"><option>2025 · Sem 3</option><option>2025 · Sem 2</option></select>
+        </div>
+        <button @click="step='reporte'" class="px-3.5 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">Generar reporte →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Paso 2: Insights (auto) + Lo que llenas ===== -->
+  <div x-show="step==='reporte'" x-transition class="grid lg:grid-cols-2 gap-4">
+
+    <!-- INSIGHTS (automático, solo lectura) -->
+    <div class="bg-card border border-border rounded-2xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-sm font-medium">Insights</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-elevated text-muted">Automático · calculado de la operación</span>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="text-muted text-[11px] uppercase tracking-wide border-b border-border">
+          <tr class="text-left"><th class="py-2 font-medium">KPI</th><th class="py-2 font-medium text-center">Valor</th><th class="py-2 font-medium text-center">Objetivo</th><th class="py-2 font-medium text-right">Nivel</th></tr>
+        </thead>
+        <tbody>
+          {% for k in kpis %}
+            <tr class="border-b border-border last:border-0">
+              <td class="py-2.5">{{ k.kpi }}</td>
+              <td class="py-2.5 text-center font-medium {% if k.valor >= k.objetivo %}text-emerald-600{% else %}text-amber-600{% endif %}">{{ k.valor }}%</td>
+              <td class="py-2.5 text-center text-muted">{{ k.objetivo }}%</td>
+              <td class="py-2.5 text-right">
+                <span class="text-[11px] px-2 py-0.5 rounded-full {% if k.nivel == 'Excelente' %}bg-emerald-100 text-emerald-700{% elif k.nivel == 'Bueno' %}bg-emerald-50 text-emerald-600{% else %}bg-amber-100 text-amber-700{% endif %}">{{ k.nivel }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LO QUE LLENAS (inputs del coordinador) -->
+    <div class="bg-card border border-border rounded-2xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-sm font-medium">Lo que llenas</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-full text-white" style="background:var(--accent-view)">Tu evaluación</span>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="text-[11px] uppercase tracking-wide text-muted">Punto a reforzar del embudo</label>
+          <select class="mt-1 w-full text-sm rounded-lg bg-elevated/60 border border-border px-3 py-2">
+            {% for op in reforzar_opciones %}<option {% if op == punto_reforzar %}selected{% endif %}>{{ op }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="text-[11px] uppercase tracking-wide text-muted">Evaluación de la junta semanal</label>
+          <select class="mt-1 w-full text-sm rounded-lg bg-elevated/60 border border-border px-3 py-2"><option>Bueno</option><option>Excelente</option><option>Aceptable</option></select>
+        </div>
+        <div>
+          <label class="text-[11px] uppercase tracking-wide text-muted">Comentario al asesor</label>
+          <textarea rows="4" class="mt-1 w-full text-sm rounded-lg bg-elevated/60 border border-border px-3 py-2 focus:outline-none focus:border-accent">{{ comentario }}</textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button @click="step='inicio'" class="px-4 py-2 rounded-lg border border-border text-sm hover:bg-elevated">Cancelar</button>
+          <button class="px-4 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">Guardar reporte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- estado inicial (antes de generar) -->
+  <div x-show="step==='inicio'" class="grid place-items-center py-16 text-center">
+    <div class="max-w-sm">
+      <div class="mx-auto h-12 w-12 rounded-2xl grid place-items-center text-white mb-3" style="background:var(--accent-view)">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0114 0"/></svg>
+      </div>
+      <div class="font-medium">Elige un asesor y genera el reporte</div>
+      <p class="text-sm text-muted mt-1">Verás sus <b>insights automáticos</b> a la izquierda y a la derecha <b>lo que tú llenas</b> (punto a reforzar y comentario).</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

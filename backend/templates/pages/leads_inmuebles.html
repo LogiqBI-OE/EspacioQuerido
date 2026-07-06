@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+  <div>
+    <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+    <p class="text-sm text-muted">{{ page_subtitle }}</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <span class="text-xs text-muted">Último pull: {{ ultimo_pull }}</span>
+    <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+      Extraer leads
+    </button>
+  </div>
+</div>
+
+<div class="rounded-xl border border-border overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-[820px]">
+      <thead class="bg-table-header border-b border-border text-muted text-left text-[11px] uppercase tracking-wide">
+        <tr>
+          <th class="px-4 py-2.5 font-medium">Prospecto</th>
+          <th class="px-4 py-2.5 font-medium">Busca</th>
+          <th class="px-4 py-2.5 font-medium">Zona</th>
+          <th class="px-4 py-2.5 font-medium">Presupuesto</th>
+          <th class="px-4 py-2.5 font-medium">Mensaje</th>
+          <th class="px-4 py-2.5 font-medium">Fecha</th>
+          <th class="px-4 py-2.5 font-medium">Status</th>
+          <th class="px-4 py-2.5 font-medium"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in leads %}
+          <tr class="border-b border-border last:border-0 hover:bg-elevated align-top">
+            <td class="px-4 py-3 font-medium whitespace-nowrap">{{ l.nombre }}</td>
+            <td class="px-4 py-3">{{ l.busca }}</td>
+            <td class="px-4 py-3 text-muted">{{ l.zona }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">{{ l.presupuesto }}</td>
+            <td class="px-4 py-3 text-muted max-w-[280px]">{{ l.mensaje }}</td>
+            <td class="px-4 py-3 text-muted whitespace-nowrap">{{ l.fecha }}</td>
+            <td class="px-4 py-3">
+              {% if l.status == 'nuevo' %}<span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Nuevo</span>
+              {% else %}<span class="text-[11px] px-2 py-0.5 rounded-full bg-elevated text-muted">Importado</span>{% endif %}
+            </td>
+            <td class="px-4 py-3 text-right">
+              {% if l.status == 'nuevo' %}<button class="text-[12px] px-2.5 py-1 rounded-lg border border-border hover:bg-card whitespace-nowrap">Importar al CRM</button>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-[11px] text-muted mt-2">Fuente externa (Inmuebles24). El pull incremental trae desde el último corte; si la API se bloquea, cae a Excel. Al importar, el lead pasa a Leads internos.</p>
+{% endblock %}

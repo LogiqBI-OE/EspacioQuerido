@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- page header -->
+<div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-xl font-semibold">{{ page_title }}</h1>
+    <p class="text-sm text-muted">{{ page_subtitle }}</p>
+  </div>
+  <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Nuevo lead
+  </button>
+</div>
+
+<!-- barra de acciones -->
+<div class="flex items-center gap-3 mb-3">
+  <div class="relative flex-1 max-w-sm">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+    </span>
+    <input type="text" placeholder="Buscar cliente…"
+           class="w-full pl-9 pr-3 py-2 text-sm rounded-lg bg-card border border-border focus:outline-none focus:border-accent" />
+  </div>
+  <span class="text-sm text-muted">{{ leads|length }} clientes</span>
+</div>
+
+<!-- tabla estándar -->
+<div class="rounded-xl border border-border overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-[720px]">
+      <thead class="bg-table-header border-b border-border text-muted">
+        <tr class="text-left">
+          <th class="font-medium px-4 py-2.5">Cliente</th>
+          <th class="font-medium px-4 py-2.5">Fuente</th>
+          <th class="font-medium px-4 py-2.5">Etapa</th>
+          <th class="font-medium px-4 py-2.5">Asesor</th>
+          <th class="font-medium px-4 py-2.5">Calificación</th>
+          <th class="font-medium px-4 py-2.5">Temperatura</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in leads %}
+          <tr class="border-b border-border last:border-0 hover:bg-elevated cursor-pointer">
+            <td class="px-4 py-3 font-medium">{{ l.nombre }}</td>
+            <td class="px-4 py-3"><span class="text-[11px] px-2 py-0.5 rounded-full bg-elevated text-muted">{{ l.fuente }}</span></td>
+            <td class="px-4 py-3 text-muted">{{ l.etapa }}</td>
+            <td class="px-4 py-3 text-muted">{{ l.asesor }}</td>
+            <td class="px-4 py-3">
+              <span class="text-[11px] font-bold px-1.5 py-0.5 rounded {% if l.grado == 'A' %}bg-emerald-100 text-emerald-700{% elif l.grado == 'B' %}bg-amber-100 text-amber-700{% else %}bg-rose-100 text-rose-700{% endif %}">{{ l.grado }}</span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-[11px] px-2 py-0.5 rounded-full {% if l.temp == 'caliente' %}bg-rose-100 text-rose-700{% elif l.temp == 'tibio' %}bg-amber-100 text-amber-700{% else %}bg-sky-100 text-sky-700{% endif %}">
+                {% if l.temp == 'caliente' %}Caliente{% elif l.temp == 'tibio' %}Tibio{% else %}Frío{% endif %}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -137,9 +137,15 @@ es contrato final; se afina al construir cada hoja. Todas las entidades de domin
 - **Role** (catálogo **global**, definido por Admin): `nombre` + matriz `permisos` por
   `RecursoKey` (`crear`/`leer`/`editar` — **sin borrar** a nivel agencia) + `acciones`
   (`leer_clientes_de_otros`, `ver_resultados_equipo`, `asignar_clientes`, `asignar_agencias`).
-- **RecursoKey** (constante en código, no dato): `pipeline`, `leads`, `conversaciones`, `libros`,
-  `ventas`, `team_performance`, `funnel`, `agentes`, `money_monday`, `uno_a_uno`, `asesores`,
+- **RecursoKey** (constante en código, no dato): `leads` (internos), `pipeline` (incluye funnel),
+  `muro` (comentarios internos), `libros`, `conversaciones` (externo), `leads_inmuebles` (externo),
+  `integraciones`, `ventas`, `team_performance`, `agentes`, `junta_semanal`, `uno_a_uno`, `asesores`,
   `configuracion`, `agencias`.
+- **Leads internos vs externos**: `leads` = directorio de clientes ya dentro del CRM (Operación).
+  `leads_inmuebles` = leads externos del portal Inmuebles24 que se **extraen e importan** (Lead
+  management). Conversaciones y Muro son distintos: **Muro de comentarios** = notas INTERNAS del
+  equipo; **Conversaciones** = chat EXTERNO con leads.
+- **API Keys** (dentro de Agentes IA) y config sensible: **gated a Administrador+** del tenant.
 - **Lead / Operación**: FK `agencia`, `fuente`, `etapa`, FK `asesor`, `calificacion`, `temperatura`.
 - **Etapa**: `nuevos`/`calificados`/`citas`/`negociacion`/`cierre`/`reactivacion`.
 - **Calificacion (fit)**: `grado` (A/B/C), `score` (0–100), `bant` (presupuesto, financiamiento,
@@ -147,8 +153,23 @@ es contrato final; se afina al construir cada hoja. Todas las entidades de domin
 - **Temperatura**: `caliente`/`tibio`/`frio`.
 - **Conversacion / Mensaje**: hilo por lead + respuesta sugerida (`texto`, `confianza`).
 - **Propiedad**: inventario con `match_pct` contra lo que busca el lead.
-- **Asesor**: FK `agencia`, `nombre`, `pipeline_activo`, `vendido`, `pct_meta`.
-- **Comision**: registro de operación (facturado, por cobrar, separación, ofrecimiento).
+- **Asesor**: FK `agencia`, `nombre`, `pipeline_activo`, `vendido`, `pct_meta`, `contrato_modelo`.
+- **Operacion / Comision** (registro maestro del Libro de comisiones): FK `agencia`, FK `asesor`,
+  FK `lead`, FK `propiedad`; `tipo` (venta/renta), `status_cierre`, `status_pago`
+  (facturado/por_cobrar/ofrecimiento/separacion), `monto_venta`/`facturacion`, `pct_comision`,
+  `comision_total`, `portafolio`; **reparto**: `pct_asesor`+`comision_asesor`, `pct_eq`+`comision_eq`,
+  `comision_coordinador`; **fechas oficiales**: `fecha_venta`, `fecha_separacion`, `fecha_cobro`.
+- **EtapaEvento** (auditoría): `operacion`, `etapa`, `timestamp` — se registra **cada** transición
+  de etapa (el Libro conserva las fechas oficiales derivadas de estos eventos).
+- **Propiedad**: `nombre`, `tipo` (departamento/casa/oficina/terreno), `municipio`, `zona`,
+  `colonia`, `match_pct`.
+- **JuntaSemanal** (fila por consultor/semana): `consultor`, `semana`, `asistencia`,
+  `clientes_hot`, `seguimiento_leads`, reales `{ofrecimientos, separaciones, citas}`, plan
+  `{citas}`, `evaluacion` (asignar_leads/ok/feedback_coordinador), `comentarios`.
+- **EvaluacionUnoAUno** (KPIs por asesor/semana vs objetivo): `asesor`, `periodo`, y por métrica
+  (asistencia_1a1, actualizacion_status, actualizacion_comentarios, citas, evaluacion_junta,
+  conversion_citas, conversion_global) su `valor`/`objetivo`/`nivel`; más `punto_a_reforzar` y
+  `comentario`.
 - **Agente**: pieza de IA (`tipo`, `autonomia`) — diales en la hoja Reglas.
 - **SaldoTokensIA**: FK `agencia`, `comprados`, `consumidos`.
 - **Brand**: FK `tenant`, `logo`, `favicon`, `login_fotos`, `login_textos`.
@@ -174,11 +195,13 @@ El detalle ejecutable (tareas + criterio "listo cuando…") vive en `BUILD_PLAN.
 9. **Fase 8** — Vista Developer.
 
 ### Orden de las hojas del cockpit (vista Operativa)
-1. **Operación**: Pipeline · Leads · Conversaciones · Libros
-2. **Analítica**: Ventas · Team performance · Funnel performance
-3. **Automatizaciones + IA**: Agentes IA *(con pestañas)*
-4. **Sistema operativo**: Money Monday · 1:1
-5. **Administración**: Asesores · Configuración
+1. **Operación**: **Leads** *(internos, landing)* · Pipeline *(kanban + vista funnel)* · **Muro de
+   comentarios** *(interno)* · Libros
+2. **Lead management** *(externo)*: Conversaciones · Leads Inmuebles24 · Integraciones
+3. **Analítica**: Ventas *(dashboards: tabs + filtros)* · Team performance   *(Funnel dentro de Pipeline)*
+4. **Automatizaciones + IA**: Agentes IA *(pestañas por agente + API Keys gated)*
+5. **Sistema operativo**: Junta semanal *(antes Money Monday)* · 1:1
+6. **Administración**: Asesores · Configuración
 
 ---
 

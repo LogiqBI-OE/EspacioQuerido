@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-5">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="bg-card border border-border rounded-2xl" x-data="{tab:'listing'}">
+  <!-- tabs -->
+  <div class="flex gap-1 px-3 pt-3 border-b border-border overflow-x-auto">
+    {% for a in agentes %}
+      <button @click="tab='{{ a.key }}'" class="px-3 py-2 text-sm whitespace-nowrap" :class="tab==='{{ a.key }}' ? 'font-medium border-b-2' : 'text-muted'" :style="tab==='{{ a.key }}' ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''">{{ a.nombre }}</button>
+    {% endfor %}
+    {% if es_admin %}
+      <button @click="tab='apikeys'" class="ml-auto px-3 py-2 text-sm whitespace-nowrap flex items-center gap-1.5" :class="tab==='apikeys' ? 'font-medium border-b-2' : 'text-muted'" :style="tab==='apikeys' ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+        API Keys
+      </button>
+    {% endif %}
+  </div>
+
+  <!-- panels de agentes -->
+  {% for a in agentes %}
+    <div x-show="tab==='{{ a.key }}'" {% if not forloop.first %}x-cloak{% endif %} class="p-5">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="h-11 w-11 shrink-0 grid place-items-center rounded-xl text-white" style="background:var(--accent-view)">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-semibold">{{ a.nombre }}</h2>
+            <span class="text-[11px] px-2 py-0.5 rounded-full {% if a.estado == 'Activo' %}bg-emerald-100 text-emerald-700{% elif a.estado == 'Parcial' %}bg-amber-100 text-amber-700{% else %}bg-elevated text-muted{% endif %}">{{ a.estado }}</span>
+          </div>
+          <p class="text-sm text-muted mt-1 max-w-2xl">{{ a.desc }}</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <!-- panel de control: reglas -->
+        <div class="border border-border rounded-xl p-4">
+          <div class="text-[11px] uppercase tracking-wide text-muted mb-3">Panel de control · reglas</div>
+          <div class="space-y-2.5">
+            {% for label, value in a.reglas %}
+              <div class="flex items-center justify-between gap-3 text-sm">
+                <span class="text-muted">{{ label }}</span>
+                <span class="px-2 py-0.5 rounded-md bg-elevated text-[12px] font-medium">{{ value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+          <button class="mt-4 text-[12px] px-2.5 py-1 rounded-lg border border-border hover:bg-elevated">Editar reglas</button>
+        </div>
+
+        <!-- status / actividad -->
+        <div class="border border-border rounded-xl p-4">
+          <div class="text-[11px] uppercase tracking-wide text-muted mb-3">Status · lo que ha hecho</div>
+          <div class="space-y-2.5">
+            {% for act in a.actividad %}
+              <div class="flex items-center gap-2.5 text-sm">
+                <span class="h-1.5 w-1.5 rounded-full shrink-0" style="background:var(--accent-view)"></span>
+                <span>{{ act }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <!-- panel API Keys (gated a Administrador+) -->
+  {% if es_admin %}
+    <div x-show="tab==='apikeys'" x-cloak class="p-5">
+      <div class="flex items-center gap-2 mb-1">
+        <h2 class="font-semibold">API Keys</h2>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Solo Administrador +</span>
+      </div>
+      <p class="text-sm text-muted mb-4 max-w-2xl">Credenciales de los servicios que usan los agentes. Visible únicamente para roles de Administrador hacia arriba del tenant.</p>
+      <div class="rounded-xl border border-border overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-table-header border-b border-border text-muted text-left text-[11px] uppercase tracking-wide">
+            <tr><th class="px-4 py-2.5 font-medium">Servicio</th><th class="px-4 py-2.5 font-medium">Uso</th><th class="px-4 py-2.5 font-medium">Key</th><th class="px-4 py-2.5 font-medium">Estado</th><th class="px-4 py-2.5"></th></tr>
+          </thead>
+          <tbody>
+            {% for k in api_keys %}
+              <tr class="border-b border-border last:border-0">
+                <td class="px-4 py-3 font-medium">{{ k.nombre }}</td>
+                <td class="px-4 py-3 text-muted">{{ k.uso }}</td>
+                <td class="px-4 py-3 font-mono text-[12px]">{{ k.mask }}</td>
+                <td class="px-4 py-3"><span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{{ k.estado }}</span></td>
+                <td class="px-4 py-3 text-right"><button class="text-[12px] px-2.5 py-1 rounded-lg border border-border hover:bg-elevated">Reemplazar</button></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <button class="mt-4 flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Agregar API key
+      </button>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

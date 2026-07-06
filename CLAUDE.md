@@ -78,7 +78,13 @@ El menú agrupa las hojas por **intención**, de lo más cotidiano a lo más adm
 - Funciones: leer la conversación, entender el perfil/scoring, aprobar (o ajustar) la respuesta sugerida.
 
 **Libros** *(dos pestañas)*
-- **Libro de comisiones**: registro de operaciones, incluye agregar operaciones históricas.
+- **Libro de comisiones**: el registro maestro de operaciones. Guarda el **timestamp de cada cambio
+  de etapa** (se registran TODAS las transiciones), y conserva la **fecha oficial de venta** y la
+  **fecha oficial de cobro** (recibo del dinero). Por operación: info del lead/cliente, la propiedad
+  comprada (nombre, tipo, municipio), a cuánto se vendió, comisión total y su **reparto**
+  (vendedor/asesor, agencia/EQ, coordinador), con %/monto por cada uno; contrato del asesor (modelo),
+  tipo de operación (venta/renta), status de cierre y status de pago. Incluye agregar operaciones
+  históricas.
 - **Objetivos**: meta del equipo y meta por asesor.
 
 ### ANALÍTICA
@@ -94,8 +100,9 @@ El menú agrupa las hojas por **intención**, de lo más cotidiano a lo más adm
 - **Resumen**: indicadores del equipo, ranking por avance hacia la meta y el "por qué" de cada sugerencia (las señales que la generan).
 - **Por asesor**: métricas duras + habilidades blandas + el foco de mejora + la nota de su 1:1.
 
-**Funnel performance**
-- El embudo del negocio etapa por etapa, con la conversión entre cada paso.
+**Funnel performance** *(se combina dentro de Pipeline)*
+- El embudo del negocio etapa por etapa con la conversión entre pasos **vive como una vista dentro
+  de Pipeline** (kanban + embudo son dos lecturas de la misma data de etapas). No es hoja aparte.
 
 ### AUTOMATIZACIONES + IA
 
@@ -111,11 +118,20 @@ El menú agrupa las hojas por **intención**, de lo más cotidiano a lo más adm
 
 ### SISTEMA OPERATIVO
 
-**Money Monday**
-- Ritual semanal: tabla de asesores con asistencia, conteo de su pipeline por etapa y el punto de atención de cada uno.
+**Junta semanal** *(antes "Money Monday")*
+- Reporte semanal del ritual: una fila por consultor con **asistencia**, **cant. clientes hot**,
+  **seguimiento de leads + a quién se está trabajando**, y los conteos **reales de la semana pasada**
+  (ofrecimientos, separaciones, citas) vs el **plan de esta semana** (citas). Cierra con la
+  **evaluación al consultor** (Asignar leads / OK / Feedback c/ coordinador) y **comentarios
+  generales**. Encabezado con las fechas de "reales semana pasada" y "plan de esta semana".
 
 **1:1**
-- Hoja de seguimiento individual del asesor *(probablemente se integra dentro de Team performance)*.
+- **Evaluación semanal de KPIs por asesor** para ver cómo va y decidir sus **puntos a reforzar**.
+  Muestra, contra su **objetivo**: asistencia 1:1, actualización de status y de comentarios, citas,
+  evaluación de la junta semanal, **conversión de citas** (leads→citas) y **conversión global**
+  (leads→cierres), cada uno con su % y semáforo (Excelente/Bueno/Aceptable). Además el **punto a
+  reforzar del embudo** (p. ej. captaciones) y un **comentario al asesor**. Cubre asistencia, ventas,
+  qué tiene por vender / por cobrar, cantidad de clientes y atención a leads.
 
 ### ADMINISTRACIÓN
 

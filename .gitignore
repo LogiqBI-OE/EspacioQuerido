@@ -20,6 +20,11 @@ theme/static/
 .env.*
 !.env.example
 
+# Datos sensibles del negocio (no subir a git; ya viven en CRM_Postgre)
+*.xlsx
+*.xls
+backend/data/
+
 # OS / editor
 .DS_Store
 Thumbs.db

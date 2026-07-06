@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-5">
+  <h1 class="text-xl font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="grid place-items-center py-24">
+  <div class="text-center max-w-sm">
+    <div class="mx-auto h-12 w-12 rounded-2xl grid place-items-center text-white mb-4" style="background:var(--accent-view)">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>
+    </div>
+    <h2 class="font-medium">{{ page_title }}</h2>
+    <p class="text-sm text-muted mt-1">Esta hoja se construye en su fase del <b>BUILD_PLAN</b>. El esqueleto y la navegación ya están listos.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-4">
+  <!-- conectores -->
+  <div class="lg:col-span-2 space-y-3">
+    {% for i in integraciones %}
+      <div class="bg-card border border-border rounded-2xl p-3 flex items-center gap-3">
+        <div class="h-9 w-9 shrink-0 grid place-items-center rounded-lg bg-elevated text-muted">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M9 2v5M15 2v5M7 7h10v4a5 5 0 01-10 0zM12 16v6"/></svg>
+        </div>
+        <div class="min-w-0">
+          <div class="text-sm font-medium">{{ i.nombre }}</div>
+          <div class="text-[11px] text-muted">{{ i.tipo }} · sync {{ i.sync }}</div>
+        </div>
+        <div class="ml-auto flex items-center gap-3">
+          {% if i.estado == 'Conectado' %}<span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Conectado</span>
+          {% elif i.estado == 'Parcial' %}<span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Parcial</span>
+          {% else %}<span class="text-[11px] px-2 py-0.5 rounded-full bg-elevated text-muted">Desconectado</span>{% endif %}
+          <button class="text-[12px] px-2.5 py-1 rounded-lg border border-border hover:bg-elevated">Configurar</button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- bitácora -->
+  <div class="bg-card border border-border rounded-2xl p-4">
+    <div class="text-sm font-medium mb-3">Bitácora de sincronizaciones</div>
+    <div class="space-y-3">
+      {% for b in bitacora %}
+        <div class="flex gap-3">
+          <div class="mt-1 h-2 w-2 rounded-full shrink-0" style="background:var(--accent-view)"></div>
+          <div>
+            <div class="text-[13px]"><b>{{ b.fuente }}</b> · {{ b.hora }}</div>
+            <div class="text-[12px] text-muted">{{ b.detalle }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

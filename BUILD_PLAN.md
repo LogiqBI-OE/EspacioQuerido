@@ -61,11 +61,13 @@ Base del proyecto Django y el sistema de vistas. Es lo más pesado del arranque.
 
 ## F1 — Núcleo operativo (vista Operativa)
 
-- [ ] **Pipeline** (`pipeline` app, home): tablero **kanban** por etapa (Nuevos → Calificados →
-  Citas → Negociación → Cierre → Reactivación) con tarjetas; tira de KPIs arriba; sección **"Por
-  aprobar"** (aprobar/rechazar propuestas de IA vía HTMX). Drag entre columnas con Alpine o botones
-  de avanzar etapa (definir al construir). *Verify:* se ve el negocio de un vistazo, se aprueba/
-  rechaza y se abre una operación.
+- [ ] **Pipeline** (`pipeline` app): tablero **kanban** por etapa (Nuevos → Calificados → Citas →
+  Negociación → Cierre → Reactivación) con tarjetas; tira de KPIs arriba; sección **"Por aprobar"**
+  (aprobar/rechazar propuestas de IA vía HTMX). Drag entre columnas con Alpine o botones de avanzar
+  etapa (definir al construir). **Incluye una vista de "Funnel"** (embudo etapa por etapa con
+  conversión entre pasos) como segunda lectura de la misma data — Funnel NO es hoja aparte.
+  *Verify:* se ve el negocio de un vistazo (kanban y embudo), se aprueba/rechaza y se abre una
+  operación.
 - [ ] **Detalle de operación** (partial completo): sugerencia del copiloto → **scoring de dos ejes**
   (badges calificación A/B/C + BANT, temperatura + porqué) → siguiente acción → propiedades
   asociadas → actividad/trazabilidad → motivo de rechazo. *Verify:* desde una tarjeta se entiende
@@ -113,19 +115,27 @@ asignación funcionando.
 - [ ] **Team performance** (`team` app, 2 tabs): **Resumen** (KPIs del equipo, ranking por meta, el
   "por qué" de cada sugerencia) · **Por asesor** (métricas duras + habilidades blandas + foco + nota
   de 1:1). *Verify:* se ve el desempeño del equipo y de cada asesor con su foco.
-- [ ] **Funnel performance** (`funnel` app): embudo etapa por etapa con conversión entre pasos.
-  *Verify:* se identifica dónde se cae la operación.
+- [ ] ~~Funnel performance~~ → **combinado dentro de Pipeline** (F1) como vista de embudo. No hoja
+  aparte. (El widget "pipeline funnel" también aparece en el dashboard de Ventas.)
 
 ---
 
 ## F5 — Rituales + administración operativa
 
-- [ ] **Libros** (`libros` app, 2 tabs): **Libro de comisiones** (registro + agregar históricas) ·
-  **Objetivos** (meta del equipo y por asesor). *Verify:* registrar una operación y ver metas.
-- [ ] **Money Monday** (`money_monday` app): tabla asesor × asistencia + pipeline por etapa + punto
-  de atención. *Verify:* se ve el ritual semanal completo.
-- [ ] **1:1** (`uno_a_uno` app): seguimiento individual del asesor *(evaluar fusionarlo con Team
-  performance — pendiente)*. *Verify:* abrir el 1:1 de un asesor.
+- [ ] **Libros** (`libros` app, 2 tabs): **Libro de comisiones** — registro maestro con **timestamp
+  de cada cambio de etapa** (`EtapaEvento`), **fecha oficial de venta** y **de cobro**, cliente,
+  propiedad (nombre/tipo/municipio/zona), monto de venta, comisión total y su **reparto** (asesor /
+  EQ-agencia / coordinador con %/monto), contrato del asesor, tipo (venta/renta), status de cierre y
+  de pago; agregar históricas. · **Objetivos** (meta del equipo y por asesor). *Verify:* registrar
+  una operación, mover su etapa (queda el evento) y ver el reparto de comisión.
+- [ ] **Junta semanal** (`junta_semanal` app; antes Money Monday): reporte semanal, una fila por
+  consultor — asistencia, clientes hot, seguimiento de leads + a quién, reales de la semana pasada
+  (ofrecimientos/separaciones/citas) vs plan de esta semana (citas), evaluación (asignar leads / OK /
+  feedback coordinador) y comentarios. *Verify:* se ve la tabla semanal con reales vs plan.
+- [ ] **1:1** (`uno_a_uno` app): **evaluación semanal de KPIs por asesor** vs objetivo (asistencia
+  1:1, actualización status/comentarios, citas, evaluación junta, conversión citas y global), con
+  semáforo, **punto a reforzar del embudo** y comentario al asesor. *Verify:* abrir el 1:1 de un
+  asesor y ver sus KPIs vs objetivo y su punto a reforzar.
 - [ ] **Asesores** (`asesores` app): directorio (pipeline activo, vendido, % meta) + alta de asesor
   (Drawer Flowbite). *Verify:* alta y listado de asesores.
 - [ ] **Configuración** (`configuracion` app): ajustes generales. *Verify:* guardar un ajuste.

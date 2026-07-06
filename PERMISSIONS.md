@@ -71,8 +71,12 @@ mismos nombres con los mismos permisos**. Los roles **no** son por-agencia.
 
 ### Recursos (filas de la matriz) — vista Operativa
 
-`pipeline` · `leads` · `conversaciones` · `libros` · `ventas` · `team_performance` · `funnel` ·
-`agentes` · `money_monday` · `uno_a_uno` · `asesores` · `configuracion`.
+`leads` (internos) · `pipeline` (incluye funnel) · `muro` · `libros` · `conversaciones` (externo) ·
+`leads_inmuebles` (externo) · `integraciones` · `ventas` · `team_performance` · `agentes` ·
+`junta_semanal` · `uno_a_uno` · `asesores` · `configuracion`.
+
+> **Gating especial:** la pestaña **API Keys** (dentro de Agentes IA) y credenciales/config sensible
+> solo son visibles/editables para roles **Administrador hacia arriba** del tenant.
 *(Vista Region agrega el recurso `agencias`.)*
 
 ### Matriz propuesta (recurso × rol)  **[PROPUESTA — ajustable]**
@@ -91,9 +95,8 @@ Headers: **Jr**=Asesor junior · **Esp**=especialista · **Pro**=pro · **Exp**=
 | libros | L | L | L | L | CLE | CLE | CLE | CLE |
 | ventas | L | L | L | L | L | L | L | L |
 | team_performance | ✕ | ✕ | L | L | CLE | CLE | CLE | CLE |
-| funnel | ✕ | L | L | L | L | L | L | L |
 | agentes | L | L | L | L | L | CLE | CLE | CLE |
-| money_monday | L | L | L | L | CLE | CLE | CLE | CLE |
+| junta_semanal | L | L | L | L | CLE | CLE | CLE | CLE |
 | uno_a_uno | L | L | L | L | CLE | CLE | CLE | CLE |
 | asesores | ✕ | ✕ | ✕ | ✕ | L | CLE | CLE | CLE |
 | configuracion | ✕ | ✕ | ✕ | ✕ | ✕ | CLE | CLE | CLE |
@@ -110,8 +113,8 @@ Headers: **Jr**=Asesor junior · **Esp**=especialista · **Pro**=pro · **Exp**=
 
 > Nota: los 4 tiers de **Asesor** comparten casi toda la matriz; su diferencia real es de
 > **seniority/límites** (calidad y volumen de leads asignados, presupuesto de tokens de IA,
-> autonomía) más un ligero escalón de visibilidad analítica (funnel → team_performance) y, en el
-> tier **experto**, la lectura de clientes ajenos. **Adm / Ger / Dir** comparten matriz de pantalla
+> autonomía) más un ligero escalón de visibilidad analítica (team_performance en Pro/Experto) y, en
+> el tier **experto**, la lectura de clientes ajenos. **Adm / Ger / Dir** comparten matriz de pantalla
 > (control casi total, sin borrar); se diferencian por **scope** (una agencia → varias agencias →
 > todo) y jerarquía. Todo esto es punto de partida — el Admin lo ajusta desde la hoja de Roles.
 
@@ -136,8 +139,8 @@ Mismos nombres y permisos en todas las agencias. Descripciones propuestas (a val
 
 | Nombre de rol | Descripción y scope |
 |---|---|
-| **Asesor junior** | Ejecutivo en formación. Opera su propio pipeline (leads, conversaciones) sobre **sus** clientes asignados; ve sus números y su 1:1/Money Monday. Sin funnel ni analítica de equipo. **No ve clientes de otros.** |
-| **Asesor especialista** | Asesor de experiencia media. Igual que junior **+ ve el funnel** del negocio. Mayor volumen/calidad de leads asignados. |
+| **Asesor junior** | Ejecutivo en formación. Opera su propio pipeline (leads, conversaciones, embudo) sobre **sus** clientes asignados; ve sus números y su 1:1/Junta semanal. Sin analítica de equipo. **No ve clientes de otros.** |
+| **Asesor especialista** | Asesor de experiencia media. Misma vista que junior; la diferencia es de seniority/límites (mayor volumen y calidad de leads asignados). |
 | **Asesor pro** | Asesor consolidado. **+ ve team_performance** (contexto de equipo, lectura). Mayor autonomía y presupuesto de tokens de IA. |
 | **Asesor experto** | Asesor senior / mentor. **+ puede leer (no editar) clientes de otros** asesores para cobertura y mentoría. Máxima autonomía operativa. No administra equipo. |
 | **Líder de equipos** | Conduce un equipo. CRUD (sin borrar) sobre **sus** clientes **y los de su equipo**; ve resultados del equipo; conduce Money Monday y 1:1; **asigna clientes** a sus asesores. Scope = su equipo. |

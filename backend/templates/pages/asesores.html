@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+    <p class="text-sm text-muted">{{ page_subtitle }}</p>
+  </div>
+  <button class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Nuevo asesor
+  </button>
+</div>
+
+<div class="rounded-xl border border-border overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-[640px]">
+      <thead class="bg-table-header border-b border-border text-muted text-left text-[11px] uppercase tracking-wide">
+        <tr>
+          <th class="px-4 py-2.5 font-medium">Asesor</th>
+          <th class="px-4 py-2.5 font-medium">Contrato</th>
+          <th class="px-4 py-2.5 font-medium text-center">Pipeline activo</th>
+          <th class="px-4 py-2.5 font-medium text-right">Vendido</th>
+          <th class="px-4 py-2.5 font-medium w-56">% Meta</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in asesores %}
+          <tr class="border-b border-border last:border-0 hover:bg-elevated">
+            <td class="px-4 py-3 font-medium whitespace-nowrap">
+              <div class="flex items-center gap-2.5">
+                <span class="h-8 w-8 rounded-full grid place-items-center text-white text-[11px] font-semibold" style="background:var(--accent-view)">{{ a.nombre|slice:":1" }}</span>
+                {{ a.nombre }}
+              </div>
+            </td>
+            <td class="px-4 py-3 text-muted">{{ a.contrato }}</td>
+            <td class="px-4 py-3 text-center">{{ a.pipeline }}</td>
+            <td class="px-4 py-3 text-right">{{ a.vendido }}</td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-2 rounded-full bg-elevated overflow-hidden">
+                  <div class="h-full rounded-full" style="width:{{ a.pct }}%; background:var(--accent-view)"></div>
+                </div>
+                <span class="text-xs text-muted w-9 text-right">{{ a.pct }}%</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

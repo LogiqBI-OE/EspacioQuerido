@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-5">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="bg-card border border-border rounded-2xl" x-data="{tab:'resumen'}">
+  <div class="flex gap-1 px-3 pt-3 border-b border-border">
+    <button @click="tab='resumen'" class="px-3 py-2 text-sm" :class="tab==='resumen' ? 'font-medium border-b-2' : 'text-muted'" :style="tab==='resumen' ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''">Resumen</button>
+    <button @click="tab='asesor'" class="px-3 py-2 text-sm" :class="tab==='asesor' ? 'font-medium border-b-2' : 'text-muted'" :style="tab==='asesor' ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''">Por asesor</button>
+  </div>
+
+  <!-- Resumen: ranking por meta -->
+  <div x-show="tab==='resumen'" class="p-3 overflow-x-auto">
+    <table class="w-full text-sm min-w-[640px]">
+      <thead class="bg-table-header border-b border-border text-muted text-left text-[11px] uppercase tracking-wide">
+        <tr>
+          <th class="px-3 py-2 font-medium">#</th>
+          <th class="px-3 py-2 font-medium">Asesor</th>
+          <th class="px-3 py-2 font-medium w-56">Avance a meta</th>
+          <th class="px-3 py-2 font-medium text-center">Cierres</th>
+          <th class="px-3 py-2 font-medium text-center">Citas</th>
+          <th class="px-3 py-2 font-medium">Señal (el "por qué")</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in resumen %}
+          <tr class="border-b border-border last:border-0 hover:bg-elevated">
+            <td class="px-3 py-3 text-muted">{{ forloop.counter }}</td>
+            <td class="px-3 py-3 font-medium whitespace-nowrap">{{ r.asesor }}</td>
+            <td class="px-3 py-3">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-2 rounded-full bg-elevated overflow-hidden">
+                  <div class="h-full rounded-full" style="width:{{ r.avance }}%; background:var(--accent-view)"></div>
+                </div>
+                <span class="text-xs text-muted w-9 text-right">{{ r.avance }}%</span>
+              </div>
+            </td>
+            <td class="px-3 py-3 text-center">{{ r.cierres }}</td>
+            <td class="px-3 py-3 text-center">{{ r.citas }}</td>
+            <td class="px-3 py-3 text-muted">{{ r.senal }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Por asesor: tarjetas -->
+  <div x-show="tab==='asesor'" x-cloak class="p-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    {% for r in resumen %}
+      <div class="border border-border rounded-xl p-3">
+        <div class="flex items-center justify-between">
+          <span class="font-medium text-sm">{{ r.asesor }}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-elevated text-muted">{{ r.avance }}% meta</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+          <div class="rounded-lg bg-elevated/50 py-2"><div class="text-lg font-semibold">{{ r.cierres }}</div><div class="text-[11px] text-muted">Cierres</div></div>
+          <div class="rounded-lg bg-elevated/50 py-2"><div class="text-lg font-semibold">{{ r.citas }}</div><div class="text-[11px] text-muted">Citas</div></div>
+        </div>
+        <div class="mt-3 text-[11px] uppercase tracking-wide text-muted">Foco</div>
+        <p class="text-sm">{{ r.senal }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

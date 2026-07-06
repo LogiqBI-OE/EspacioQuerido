@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="max-w-3xl space-y-4">
+  <!-- nuevo comentario -->
+  <div class="bg-card border border-border rounded-2xl p-3">
+    <div class="flex gap-3">
+      <div class="h-9 w-9 shrink-0 rounded-full grid place-items-center text-white text-xs font-semibold" style="background:var(--accent-view)">OE</div>
+      <div class="flex-1">
+        <textarea rows="2" placeholder="Escribe un comentario interno sobre una operación…" class="w-full text-sm rounded-lg bg-elevated/60 border border-border px-3 py-2 focus:outline-none focus:border-accent"></textarea>
+        <div class="flex justify-end mt-2">
+          <button class="px-3.5 py-1.5 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">Publicar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- feed -->
+  <div class="space-y-3">
+    {% for c in muro %}
+      <div class="bg-card border border-border rounded-2xl p-3">
+        <div class="flex gap-3">
+          <div class="h-9 w-9 shrink-0 rounded-full grid place-items-center text-white text-xs font-semibold" style="background:var(--accent-view)">{{ c.autor|slice:":1" }}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-medium">{{ c.autor }}</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-elevated text-muted">{{ c.op }}</span>
+              <span class="ml-auto text-[11px] text-muted">{{ c.hora }}</span>
+            </div>
+            <p class="text-sm mt-1">{{ c.texto }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cockpit · Operación inmobiliaria con IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.3.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root{
+  --ink:#18181B;--ink-soft:#27272A;--ink-line:#3F3F46;--ink-text:#D4D4D8;--ink-dim:#71717A;
+  --paper:#F1F5F9;--card:#FFFFFF;--line:#E7EBEE;--line-2:#D6DDE1;
+  --text:#15242F;--text-2:#5C6973;--text-3:#94A0A8;
+  --teal:#2563EB;--teal-bright:#3B82F6;--teal-tint:#E4EDFD;--teal-ink:#1E40AF;
+  --coral:#E2563B;--coral-tint:#FBE3DD;--coral-ink:#A53A24;
+  --amber:#BA7517;--amber-tint:#FAEEDA;--amber-ink:#633806;
+  --green:#3B6D11;--green-tint:#EAF3DE;--green-ink:#27500A;
+  --purple:#534AB7;--purple-tint:#EEEDFE;--purple-ink:#3C3489;--blue-tint:#E6F1FB;--blue-ink:#0C447C;
+  --r-sm:7px;--r-md:10px;--r-lg:14px;--fd:'Bricolage Grotesque',serif;--fb:'Hanken Grotesk',sans-serif;
+  --sh:0 1px 2px rgba(20,40,55,.04),0 4px 16px rgba(20,40,55,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--paper);color:var(--text);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#c7d0d6;border-radius:6px}
+.ti{font-size:18px;line-height:1;vertical-align:-2px}
+.side{background:var(--ink);color:var(--ink-text);display:flex;flex-direction:column;padding:14px 11px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line)}
+.tab{font-size:13px;padding:9px 15px;cursor:pointer;color:var(--text-2);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500}
+.tab:hover{color:var(--text)}.tab.on{color:#2563EB;border-bottom-color:#2563EB}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 10px}
+.brand .mk{width:26px;height:26px;border-radius:7px;background:var(--teal-bright);display:flex;align-items:center;justify-content:center;color:#fff}
+.brand b{font-family:var(--fd);font-weight:500;font-size:18px;color:#fff}
+.brand span{font-size:10px;color:var(--ink-dim);display:block;margin-top:-2px}
+.gl{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#586D7E;padding:8px 9px 3px}
+.it{display:flex;align-items:center;gap:10px;padding:6px 9px;border-radius:8px;font-size:13px;cursor:pointer;position:relative;color:var(--ink-text);transition:.13s}
+.it .ti{font-size:16px;color:#8EA2B2}
+.it:hover{background:var(--ink-soft)}
+.it.on{background:rgba(59,130,246,.16);color:#60A5FA}.it.on .ti{color:#60A5FA}
+.it.on::before{content:"";position:absolute;right:-12px;top:8px;bottom:8px;width:3px;border-radius:3px 0 0 3px;background:#3B82F6}
+.it .bd{margin-left:auto;font-size:10px;padding:1px 7px;border-radius:999px;background:var(--amber-tint);color:var(--amber-ink)}
+.note{margin-top:auto;font-size:10px;color:var(--ink-dim);padding:10px 9px 2px;border-top:1px solid var(--ink-line);line-height:1.4}
+.main{display:flex;flex-direction:column;min-width:0}
+.top{display:flex;align-items:center;gap:16px;padding:15px 26px;background:rgba(241,245,249,.88);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.top h1{font-family:var(--fd);font-weight:500;font-size:21px}.top .sub{font-size:12.5px;color:var(--text-2);margin-top:1px}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;width:220px;color:var(--text-3)}
+.search input{border:0;outline:0;font-family:var(--fb);font-size:13px;width:100%;background:transparent;color:var(--text)}
+.iconbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-2);position:relative}
+.iconbtn .pip{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--coral)}
+.me{width:36px;height:36px;border-radius:50%;background:var(--purple-tint);color:var(--purple-ink);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px}
+.view{padding:22px 26px 44px;animation:rise .34s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:999px}
+.c-teal{background:var(--teal-tint);color:var(--teal-ink)}.c-coral{background:var(--coral-tint);color:var(--coral-ink)}
+.c-amber{background:var(--amber-tint);color:var(--amber-ink)}.c-green{background:var(--green-tint);color:var(--green-ink)}
+.c-purple{background:var(--purple-tint);color:var(--purple-ink)}.c-blue{background:var(--blue-tint);color:var(--blue-ink)}.c-gray{background:#EEF1F2;color:#52606a}
+.btn{font-family:var(--fb);font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--r-md);border:1px solid var(--line-2);background:var(--card);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.14s}
+.btn:hover{border-color:#bcc6cc;background:#fafbfb}.btn:active{transform:scale(.98)}
+.btn-p{background:var(--teal);border-color:var(--teal);color:#fff}.btn-p:hover{background:#1D4ED8;border-color:#1D4ED8}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--sh)}
+.kpi .lb{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:7px}.kpi .vl{font-family:var(--fd);font-weight:500;font-size:29px;margin-top:6px}.kpi .tr{font-size:11px;color:var(--text-3);margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--sh);margin-bottom:16px}
+.panel h3{font-family:var(--fd);font-weight:500;font-size:16px;margin-bottom:3px}.panel .ph{font-size:12.5px;color:var(--text-2);margin-bottom:16px}
+.two{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.qrow{display:flex;align-items:center;gap:11px;font-size:13px;padding:10px 0;border-bottom:0.5px solid var(--line)}.qrow:last-child{border:0}
+.qrow .ic{width:34px;height:34px;border-radius:50%;background:var(--purple-tint);color:var(--purple-ink);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex:none}
+.qrow .tx b{font-weight:500}.qrow .tx p{font-size:11.5px;color:var(--text-2);margin-top:1px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.qrow .rt{margin-left:auto;display:flex;align-items:center;gap:8px}
+/* board */
+.board{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px}
+.col{flex:0 0 250px}
+.col-h{display:flex;align-items:center;gap:8px;padding:2px 4px 11px}
+.col-h .nm{font-weight:500;font-size:13px;display:flex;align-items:center;gap:7px}.col-h .nm i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.col-h .ag{font-size:10.5px;color:var(--text-3)}.col-h .ct{margin-left:auto;font-size:11.5px;color:var(--text-3);background:#eaeef0;padding:0 8px;border-radius:999px}
+.kcard{background:var(--card);border:0.5px solid var(--line);border-radius:var(--r-md);padding:11px 12px;margin-bottom:10px;cursor:pointer;box-shadow:var(--sh);transition:.14s;animation:rise .4s ease both}
+.kcard:hover{border-color:var(--teal-bright);transform:translateY(-1px)}.kcard.warn{border-color:#f0c98a}
+.kcard .r1{display:flex;justify-content:space-between;align-items:center;gap:6px}.kcard .nm{font-weight:500;font-size:13px}
+.kcard .r2{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.kcard .ft{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:8px;border-top:0.5px solid var(--line)}
+/* leads table */
+.lhead,.lrow{display:grid;grid-template-columns:1.7fr 1fr 1fr .9fr .8fr .8fr;gap:10px;align-items:center}
+.lhead{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2);padding:0 14px 9px}
+.lrow{background:var(--card);border:0.5px solid var(--line);border-radius:var(--r-md);padding:11px 14px;margin-bottom:8px;cursor:pointer;font-size:13px;transition:.13s;box-shadow:var(--sh)}.lrow:hover{border-color:var(--teal-bright)}
+/* connectors */
+.conns{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+.conn{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;background:var(--card);box-shadow:var(--sh)}
+.conn .ch{display:flex;align-items:center;gap:11px;margin-bottom:12px}.conn .ch b{font-size:15px;font-weight:500}
+.conn .lg{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
+.conn .mrow{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:0.5px solid var(--line)}.conn .mrow:last-of-type{border:0}.conn .mrow span:first-child{color:var(--text-2)}
+.synct{display:grid;grid-template-columns:64px 1.5fr .7fr .8fr .6fr;gap:8px;font-size:12.5px;padding:9px 0;border-bottom:0.5px solid var(--line);align-items:center}.synct.h{color:var(--text-2);font-size:11px;text-transform:uppercase;letter-spacing:.04em}.synct:last-child{border:0}
+/* automation */
+.ag-admin{border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 17px;background:var(--card);box-shadow:var(--sh);margin-bottom:13px}
+.ag-admin .top2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ag-admin .top2 b{font-size:15px;font-weight:500}.ag-admin .auto{margin-left:auto;font-size:12px;color:var(--text-2)}.ag-admin .auto b{color:var(--text)}
+.gridA{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin:13px 0 2px}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);margin-bottom:9px}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:var(--r-md);overflow:hidden;width:fit-content;max-width:100%}
+.seg span{font-size:11.5px;padding:7px 12px;color:var(--text-2);border-right:1px solid var(--line);white-space:nowrap;cursor:pointer}.seg span:last-child{border-right:0}.seg span:hover{background:#f6f8f8}.seg span.on{background:var(--teal);color:#fff}
+.metric{display:flex;align-items:baseline;gap:7px}.metric .n{font-family:var(--fd);font-size:25px;font-weight:500}.metric .u{font-size:12px;color:var(--text-2)}
+.rec{display:flex;align-items:flex-start;gap:8px;font-size:12px;border-radius:var(--r-md);padding:9px 12px;margin-top:11px}.rec.good{background:var(--teal-tint);color:var(--teal-ink)}.rec.warn{background:var(--amber-tint);color:var(--amber-ink)}
+.skills{display:flex;gap:6px;flex-wrap:wrap}.sk{font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid var(--line-2);color:var(--text-2);display:inline-flex;align-items:center;gap:5px}.sk i{color:var(--teal);font-size:13px}
+.hint{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-2);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 14px;margin-bottom:16px}
+/* inbox */
+.convo-wrap{display:flex;gap:16px;height:calc(100vh - 148px);min-height:600px}
+.inbox{display:grid;grid-template-columns:240px 1fr;flex:1 1 auto;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh);height:100%}
+.convos{border-right:1px solid var(--line);overflow-y:auto}
+.cv{display:flex;gap:11px;padding:13px 15px;cursor:pointer;border-bottom:1px solid var(--line)}.cv:hover{background:#f7f9fa}.cv.on{background:var(--teal-tint)}
+.av{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;background:#e9eef0;color:#516069}
+.cv .tx{min-width:0;flex:1}.cv .tx b{font-size:13.5px;font-weight:500;display:block}.cv .tx p{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cv .si{text-align:right;font-size:10.5px;color:var(--text-3)}.cv .si .un{display:inline-block;margin-top:5px;background:var(--teal);color:#fff;border-radius:999px;min-width:17px;height:17px;line-height:17px;font-size:10.5px;padding:0 4px}
+.thread{display:flex;flex-direction:column;min-width:0}.th-h{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px}
+.msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;background:#fbfcfc}
+.bub{max-width:74%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.45}.bub.in{align-self:flex-start;background:#eef1f2;border-bottom-left-radius:4px}.bub.out{align-self:flex-end;background:var(--teal-tint);color:var(--teal-ink);border-bottom-right-radius:4px}.bub .tm{display:block;font-size:10px;color:var(--text-3);margin-top:4px;text-align:right}
+.suggest{border-top:1px solid var(--line);padding:14px 18px;background:var(--card)}.suggest .slbl{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--teal-ink);font-weight:500;margin-bottom:9px}
+.draft{background:var(--teal-tint);border:1px dashed #b7cdf6;border-radius:var(--r-md);padding:11px 13px;font-size:13.5px;color:var(--teal-ink);line-height:1.5}
+.confbar{height:6px;background:#e7ebee;border-radius:6px;overflow:hidden;margin:11px 0 4px}.confbar i{display:block;height:100%;background:var(--teal-bright);border-radius:6px}
+.toggle{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2)}
+.sw{width:38px;height:21px;border-radius:999px;background:#cfd7db;position:relative;cursor:pointer;transition:.18s;flex:none}.sw i{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.18s}.sw.on{background:var(--teal)}.sw.on i{left:19px}
+.cv .src{margin-top:5px}
+.srcb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:#fff;padding:3px 9px;border-radius:999px}.srcb .ti{font-size:13px}
+.av-wrap{position:relative;flex:none}
+.av-badge{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:50%;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;color:#fff}.av-badge .ti{font-size:10px}
+.online{width:8px;height:8px;border-radius:50%;background:#1FA855;box-shadow:0 0 0 3px rgba(31,168,85,.18);flex:none}
+.typing{display:inline-flex;gap:4px;align-items:center}.typing i{width:6px;height:6px;border-radius:50%;background:#9aa7ad;display:inline-block;animation:bl 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.profile{flex:0 0 330px;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh);overflow-y:auto;padding:13px 15px 20px;background:var(--card);height:100%}
+.pf-h{display:flex;align-items:center;gap:10px;padding-bottom:11px;border-bottom:0.5px solid var(--line)}
+.pf-sec{padding:11px 0;border-bottom:0.5px solid var(--line)}.pf-sec:last-child{border:0;padding-bottom:0}
+.pf-sec h5{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}.pf-sec h5 .ti{font-size:14px;color:var(--teal)}
+.pf-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:2.5px 0}.pf-row .ti{font-size:14px;color:var(--text-3);flex:none}.pf-row .v{margin-left:auto;color:var(--text-2);font-size:11.5px;text-align:right}
+.pf-tags{display:flex;gap:5px;flex-wrap:wrap}.tag{font-size:10.5px;padding:2px 8px;border-radius:999px;border:0.5px solid var(--line-2);color:var(--text-2)}
+.scorebox{background:var(--teal-tint);border:0.5px solid #c9dbfb;border-radius:var(--r-md);padding:11px 12px}
+.scorebox .sc-top{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.sug-pill{font-size:11px;color:var(--teal-ink);background:var(--card);border:0.5px solid #c9dbfb;border-radius:var(--r-sm);padding:8px 10px;display:flex;gap:7px;align-items:flex-start;line-height:1.4;margin-top:9px}
+.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fp{font-size:11.5px;padding:5px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.fp.ai{background:var(--teal-tint);color:var(--teal-ink);border-color:#c9dbfb}
+.fp.hum{background:#EEF2F6;color:#475569}
+.flow .ar{color:var(--text-3);font-size:15px}
+.loop{font-size:10.5px;color:var(--coral-ink);background:var(--coral-tint);padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+.bigbar{position:relative;height:14px;background:#e7ebee;border-radius:8px;overflow:hidden}.bigbar i{display:block;height:100%;background:linear-gradient(90deg,#3B82F6,#2563EB);border-radius:8px}
+.acard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--sh);margin-bottom:13px}
+.acard .ac-h{display:flex;align-items:center;gap:11px;margin-bottom:13px}.acard .ac-h .rt{margin-left:auto}
+.acard .ac-m{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:14px}
+.acard .ac-m .m{background:var(--paper);border-radius:var(--r-md);padding:9px 11px}.acard .ac-m .m .l{font-size:11px;color:var(--text-2)}.acard .ac-m .m .v{font-family:var(--fd);font-size:18px;font-weight:500;margin-top:2px}
+.skill{display:flex;align-items:center;gap:9px;font-size:12px;margin-bottom:6px}.skill .sl{width:104px;color:var(--text-2);flex:none}.skill .st{flex:1;height:7px;background:#eef1f2;border-radius:6px;overflow:hidden}.skill .st i{display:block;height:100%;background:#3B82F6;border-radius:6px}.skill .sv{width:30px;text-align:right;flex:none;font-weight:500}
+.ac-foco{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.mm-head,.mm-row{display:grid;grid-template-columns:1.5fr .9fr repeat(6,.55fr) 1.7fr;gap:8px;align-items:center;font-size:12.5px}
+.mm-head{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2);padding:0 12px 9px}
+.mm-row{background:var(--card);border:0.5px solid var(--line);border-radius:var(--r-md);padding:11px 12px;margin-bottom:7px;box-shadow:var(--sh)}
+.led-head,.led-row{display:grid;grid-template-columns:.5fr 1.3fr 1fr .9fr .9fr .9fr .9fr .7fr;gap:8px;align-items:center;font-size:12.5px}
+.led-head{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-2);padding:0 12px 9px}
+.led-row{background:var(--card);border:0.5px solid var(--line);border-radius:var(--r-md);padding:11px 12px;margin-bottom:7px;box-shadow:var(--sh)}
+/* dashboard comisiones */
+.flts{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.flt{min-width:118px}
+.fl-l{font-size:10.5px;color:var(--text-3);margin-bottom:3px}
+.fl-v{font-size:12.5px;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text)}
+.tchip{font-size:10px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:5px 6px;text-align:center;line-height:1.15;color:var(--text-2)}
+.kc{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--line-2);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--sh)}
+.kc.red{border-left-color:#C0392B}
+.kc .l{font-size:11px;color:var(--text-2)}
+.kc .v{font-family:var(--fd);font-size:24px;font-weight:600;margin-top:3px}
+.pbar{display:grid;grid-template-columns:150px 1fr 50px;gap:9px;align-items:center;font-size:12px;padding:3px 0}
+.pbar .pn{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar .pt{height:14px;background:#eef1f3;border-radius:3px;overflow:hidden}
+.pbar .pt i{display:block;height:100%;border-radius:3px}
+.pbar .pv{text-align:right;font-weight:500;color:var(--text-2)}
+.leg{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;color:var(--text-2);margin:2px 0 12px}
+.leg span{display:flex;align-items:center;gap:5px}
+.leg i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dt-head,.dt-row{display:grid;grid-template-columns:.42fr .55fr 1.1fr .8fr .8fr .95fr 2fr;gap:8px;align-items:start}
+.dt-head{color:var(--text-3);text-transform:uppercase;font-size:9.5px;letter-spacing:.04em;padding:0 11px 8px}
+.dt-row{background:var(--card);border:0.5px solid var(--line);border-radius:8px;padding:9px 11px;margin-bottom:6px;font-size:12px}
+/* inventario */
+.props{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.prop{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh)}.prop .thumb{height:112px;display:flex;align-items:center;justify-content:center;color:#fff;position:relative}.prop .thumb .ti{font-size:38px;opacity:.55}
+.prop .match{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.94);color:var(--teal-ink);font-weight:500;font-size:12px;padding:4px 10px;border-radius:999px}
+.prop .bd{padding:13px 15px}.prop .pr{font-family:var(--fd);font-weight:500;font-size:18px}.prop .ad{font-size:12.5px;color:var(--text-2);margin:3px 0 9px}
+.prop .sp{display:flex;gap:13px;font-size:12px;color:var(--text-2);border-top:1px solid var(--line);padding-top:9px}.prop .sp span{display:flex;align-items:center;gap:5px}
+.sla-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--line);font-size:13px}.sla-row:last-child{border:0}
+.frow{display:flex;align-items:center;gap:12px;margin-bottom:10px}.frow .fl{width:120px;font-size:12.5px;flex:none}.ftrack{flex:1;background:#eef1f2;border-radius:7px;height:30px;overflow:hidden}.fbar{height:100%;border-radius:7px;display:flex;align-items:center;padding:0 11px;color:#fff;font-size:12px;font-weight:500;transition:width .9s cubic-bezier(.2,.8,.2,1)}.frow .fc{width:70px;text-align:right;font-size:12px;color:var(--text-2);flex:none}.frow .fc b{color:var(--text);font-weight:500}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(14,27,42,.34);opacity:0;pointer-events:none;transition:.2s;z-index:60}.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:480px;max-width:94vw;background:var(--paper);box-shadow:-12px 0 40px rgba(14,27,42,.18);transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:61;display:flex;flex-direction:column;overflow-y:auto}.drawer.on{transform:none}
+.dr-h{padding:20px 22px 16px;border-bottom:1px solid var(--line);background:var(--card)}.dr-h .cl{float:right;cursor:pointer;color:var(--text-2)}.dr-h .nm{font-family:var(--fd);font-weight:500;font-size:22px}.dr-h .mt{font-size:13px;color:var(--text-2);margin-top:4px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.dr-bd{padding:18px 22px;display:flex;flex-direction:column;gap:15px}
+.copilot{background:var(--card);border:1px solid var(--teal-bright);border-radius:var(--r-lg);padding:15px 16px}.copilot .ch{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;color:var(--teal-ink);margin-bottom:11px}
+.section{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 16px}.section h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);font-weight:500;margin-bottom:13px}
+.axes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.axbox{border:0.5px solid var(--line);border-radius:var(--r-md);padding:12px 13px}.axbox .at{font-size:11.5px;color:var(--text-2)}
+.arow{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0}.arow .v{margin-left:auto;color:var(--text-2);font-size:11.5px}
+.act{display:flex;align-items:flex-start;gap:8px;background:var(--teal-tint);color:var(--teal-ink);border-radius:var(--r-md);padding:10px 12px;font-size:12.5px}
+.mp{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:0.5px solid var(--line);font-size:13px}.mp:last-child{border:0}.mp .tn{width:33px;height:33px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff}.mp .mm{margin-left:auto;font-weight:500;color:var(--teal-ink);font-size:12.5px}
+.tl{position:relative;padding-left:20px}.tl::before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--line-2)}.tl .ev{position:relative;padding:0 0 13px}.tl .ev:last-child{padding-bottom:0}.tl .ev::before{content:"";position:absolute;left:-18px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--teal-bright);box-shadow:0 0 0 3px var(--paper)}.tl .ev .et{font-size:13px}.tl .ev .ed{font-size:11.5px;color:var(--text-3);margin-top:1px}
+.reject{display:flex;gap:9px;margin-top:11px}select{font-family:var(--fb);font-size:13px;padding:8px 11px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--card);color:var(--text);flex:1}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:13px 20px;border-radius:999px;font-size:13.5px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(14,27,42,.3);opacity:0;transition:.3s;z-index:80}.toast.on{transform:translateX(-50%);opacity:1}.toast .ti{color:var(--teal-bright)}
+@media(max-width:920px){.app{grid-template-columns:1fr}.side{display:none}.kpis{grid-template-columns:repeat(2,1fr)}.props,.two,.inbox,.gridA,.docs,.conns,.axes{grid-template-columns:1fr}.convo-wrap{flex-direction:column;height:auto;min-height:0}.profile{flex:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="mk"><i class="ti ti-building-skyscraper" style="font-size:16px"></i></div><div><b>Espacio Querido</b><span>operación · IA</span></div></div>
+    <nav id="nav"></nav>
+    <div class="note">El lead es la unidad de operación. Los agentes son el motor detrás de cada etapa.</div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div><h1 id="vt">Pipeline</h1><div class="sub" id="vs"></div></div>
+      <div class="search"><i class="ti ti-search"></i><input placeholder="Buscar lead, propiedad…"></div>
+      <button class="iconbtn" aria-label="Notificaciones"><i class="ti ti-bell"></i><span class="pip"></span></button>
+      <div class="me">AQ</div>
+    </header>
+    <div id="content"></div>
+  </div>
+</div>
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+<div class="toast" id="toast"><i class="ti ti-circle-check"></i><span id="tmsg"></span></div>
+
+<script>
+/* Agentes = motor detrás de cada etapa (no son navegación). */
+const AGENTES=[
+ {id:'intake',nombre:'Intake & Calificación',etapa:'Nuevos',color:'#888780',desc:'Captura, dedupe y BANT, 24/7.',sla:'instantáneo',auto:88,conv:'92%',correccion:6,modo:'auto',umbral:88,skills:['Dedupe','BANT','Enriquecimiento'],rec:['good','Clasificación confiable — candidato a full auto.']},
+ {id:'matching',nombre:'Matching & Outreach',etapa:'Calificados',color:'#3B82F6',desc:'Envía las opciones correctas en minutos.',sla:'5 min',auto:82,conv:'71%',correccion:4,modo:'auto',umbral:90,skills:['Matching','WhatsApp','Fichas'],rec:['good','Corrección muy baja — puedes pasarlo a full auto.']},
+ {id:'agenda',nombre:'Agenda',etapa:'Citas',color:'#534AB7',desc:'Coordina citas, confirma y reagenda.',sla:'10 min',auto:90,conv:'63%',correccion:5,modo:'auto',umbral:85,skills:['Calendario','WhatsApp','Recordatorios'],rec:['good','Estable. Solo confirma reagendas complejas.']},
+ {id:'negociacion',nombre:'Negociación',etapa:'Negociación',color:'#E2563B',desc:'Asiste con comparables; decide el humano.',sla:'humano',auto:35,conv:'58%',correccion:null,modo:'asistir',umbral:null,skills:['Comparables','WhatsApp'],rec:['warn','Mantener en asistido — el trato lo cierra una persona.']},
+ {id:'cierre',nombre:'Cierre',etapa:'Cierre',color:'#3B6D11',desc:'Notaría, papelería y firma.',sla:'SLA por doc',auto:70,conv:'88%',correccion:9,modo:'auto',umbral:80,skills:['Checklist MX','Notaría','Recordatorios'],rec:['good','Persigue documentos solo; aprueba solicitudes clave.']},
+ {id:'reactivacion',nombre:'Reactivación',etapa:'Reactivación',color:'#888780',desc:'Recupera leads perdidos con drip.',sla:'continuo',auto:95,conv:'11%',correccion:7,modo:'auto',umbral:85,skills:['Matching','WhatsApp','Detección inventario'],rec:['good','Funcionando solo. Aprueba re-contacto premium.']},
+];
+const etapaAgente={};AGENTES.forEach(a=>etapaAgente[a.etapa]=a);
+
+const INTEGRACIONES=[
+ {id:'inmuebles24',nombre:'Inmuebles24',tipo:'fuente',icono:'building-skyscraper',color:'#185FA5',estado:'conectado',sync:'hace 4 min',hoy:23,total:'1,840',freq:'cada 5 min'},
+ {id:'easybroker',nombre:'EasyBroker',tipo:'fuente',icono:'home-2',color:'#0F8C7E',estado:'conectado',sync:'hace 2 min',hoy:11,total:'760',freq:'tiempo real · webhook'},
+ {id:'whatsapp',nombre:'WhatsApp Business',tipo:'canal',icono:'brand-whatsapp',color:'#1FA855',estado:'conectado',sync:'en vivo',hoy:142,total:'—',freq:'webhook'},
+ {id:'facebook',nombre:'Facebook',tipo:'canal',icono:'brand-facebook',color:'#1877F2',estado:'por_conectar',sync:'—',hoy:0,total:0,freq:'Lead Ads + Messenger'},
+];
+const SYNCS=[['10:42','Inmuebles24',8,2,0],['10:39','WhatsApp',5,1,0],['10:37','EasyBroker',3,0,0],['10:24','Inmuebles24',6,1,0],['10:11','Facebook',0,0,0],['09:58','EasyBroker',4,0,1]];
+const FUENTES={inmuebles24:{n:'Inmuebles24',ic:'building-skyscraper',c:'c-blue'},easybroker:{n:'EasyBroker',ic:'home-2',c:'c-teal'},whatsapp:{n:'WhatsApp',ic:'brand-whatsapp',c:'c-green'},facebook:{n:'Facebook',ic:'brand-facebook',c:'c-blue'}};
+
+const leads=[
+ {id:1,nombre:'Carlos Vega',ini:'CV',etapa:'Nuevos',g:'?',s:'…',temp:'tibio',tipo:'Depto',zona:'Mitras',sla:'calificando',conf:0,aprobar:false,fuente:'inmuebles24',ext:'INM-48231',asesor:'O. García'},
+ {id:2,nombre:'Pareja Ramos',ini:'PR',etapa:'Nuevos',g:'?',s:'…',temp:'tibio',tipo:'Casa',zona:'Lincoln',sla:'calificando',conf:0,aprobar:false,fuente:'facebook',ext:'FB-9920',asesor:'L. Ramírez'},
+ {id:3,nombre:'María Treviño',ini:'MT',etapa:'Calificados',g:'A',s:87,temp:'caliente',tipo:'Depto',zona:'Valle Oriente',sla:'1h',conf:88,aprobar:true,fuente:'inmuebles24',ext:'INM-48213',asesor:'O. García'},
+ {id:4,nombre:'Ana Sáenz',ini:'AS',etapa:'Calificados',g:'A',s:91,temp:'caliente',tipo:'Depto',zona:'San Pedro',sla:'30m',conf:92,aprobar:true,fuente:'easybroker',ext:'EB-3157',asesor:'L. Ramírez'},
+ {id:5,nombre:'Jorge Lozano',ini:'JL',etapa:'Calificados',g:'B',s:72,temp:'tibio',tipo:'Casa',zona:'Cumbres',sla:'3h',conf:80,aprobar:false,fuente:'whatsapp',ext:'WA-1182',asesor:'D. Sol'},
+ {id:6,nombre:'Familia Garza',ini:'FG',etapa:'Citas',g:'A',s:84,temp:'caliente',tipo:'Casa',zona:'Carr. Nacional',sla:'Hoy 5pm',conf:0,aprobar:false,fuente:'inmuebles24',ext:'INM-47988',asesor:'O. García'},
+ {id:7,nombre:'Sofía Elizondo',ini:'SE',etapa:'Citas',g:'B',s:75,temp:'tibio',tipo:'Depto',zona:'Contry',sla:'Mañana 11am',conf:0,aprobar:false,fuente:'easybroker',ext:'EB-3104',asesor:'D. Sol'},
+ {id:8,nombre:'Diego Martínez',ini:'DM',etapa:'Negociación',g:'A',s:89,temp:'caliente',tipo:'Depto',zona:'Centro',sla:'$4.2M',conf:0,aprobar:false,fuente:'inmuebles24',ext:'INM-47720',asesor:'L. Ramírez'},
+ {id:9,nombre:'Regina Salazar',ini:'RS',etapa:'Cierre',g:'A',s:93,temp:'caliente',tipo:'Casa',zona:'San Pedro',sla:'Notaría',conf:0,aprobar:false,fuente:'easybroker',ext:'EB-2980',asesor:'O. García'},
+ {id:10,nombre:'Pablo Cárdenas',ini:'PC',etapa:'Reactivación',g:'B',s:64,temp:'frio',tipo:'Depto',zona:'Mitras',sla:'premium',conf:88,aprobar:true,fuente:'facebook',ext:'FB-8841',asesor:'D. Sol'},
+ {id:11,nombre:'Lucía Fuentes',ini:'LF',etapa:'Reactivación',g:'C',s:51,temp:'frio',tipo:'Casa',zona:'Escobedo',sla:'drip',conf:0,aprobar:false,fuente:'whatsapp',ext:'WA-1090',asesor:'L. Ramírez'},
+];
+const props=[
+ {t:'Depto en San Pedro',z:'Calzada del Valle',pr:'$3,950,000',rec:2,ban:2,m2:118,match:96,c:'#2563EB'},
+ {t:'Depto Valle Poniente',z:'Av. Lázaro Cárdenas',pr:'$4,200,000',rec:3,ban:2,m2:134,match:91,c:'#534AB7'},
+ {t:'Depto Dominio',z:'Vía Cordillera',pr:'$3,480,000',rec:2,ban:2,m2:102,match:84,c:'#BA7517'},
+];
+const deals=[{lead:'Regina Salazar',prop:'Casa · San Pedro',now:'Papelería'},{lead:'Diego Martínez',prop:'Depto · Centro',now:'Notaría'}];
+const funnel=[['Leads',1000],['Calificados',420],['Opciones',380],['Citas',210],['Ofertas',96],['Firmados',41]];
+const convos=[
+ {id:12,nombre:'Jonathan Domínguez',ini:'JD',fuente:'inmuebles24',last:'¿Podemos ver el de Valle Oriente?',hora:'10:48',un:2,
+  msgs:[['lead','Hola, vi varios deptos en renta en Valle Oriente. ¿Cuáles tienes?','10:30'],['nos','¡Hola Jonathan! Tengo 5 en tu rango (MN 22–37k). Te los mando ahora.','10:33'],['lead','¿Podemos ver el de Valle Oriente?','10:48']],
+  draft:'¡Claro, Jonathan! Vi que llevas un rato buscando — déjame ahorrarte vueltas. Te aparté 3 que sí cumplen 2–3 recámaras y 2 baños en Valle Oriente. ¿Te late visita mañana 11:00 o jueves por la tarde?',conf:90,
+  perfil:{det:'inmuebles24 · contacto directo en aviso · #INM-48213',
+   busca:[['home','Tipo','Depto en renta'],['cash','Presupuesto','MN 22–37 k'],['ruler-2','Superficie','90–260 m²'],['bed','Recámaras','2 a 3'],['bath','Baños','2 a 4']],
+   zonas:['Monterrey','Loma Larga','Valle Oriente','Dinastía','Centro'],
+   comp:[['eye','Visualizó','22 avisos'],['mail','Contactó','10 anunciantes'],['calendar','Buscando','hace 182 días']],
+   g:'A',s:86,temp:'caliente',
+   bant:[['circle-check','#3B6D11','Presupuesto','MN 22–37k, definido'],['circle-dashed','#BA7517','Decisor','por confirmar'],['circle-check','#3B6D11','Necesidad','zonas y m² muy claros'],['circle-dashed','#BA7517','Tiempo','182 días, comparando']],
+   sug:'Contactó a 10 anunciantes y lleva 182 días buscando: alta intención, pero está comparando mucho. Gánalo con una preselección curada y una visita esta semana — no lo dejes en cola.'}},
+ {id:10,nombre:'Pablo Cárdenas',ini:'PC',fuente:'facebook',last:'Ahorita no, gracias',hora:'Ayer',un:0,
+  msgs:[['lead','Vi el anuncio en Facebook','Ayer'],['nos','¡Hola Pablo! ¿Qué zona y presupuesto buscas?','Ayer'],['lead','Ahorita no, gracias','Ayer']],
+  draft:'Sin problema, Pablo. Entró un depto en Mitras a $3.1M, justo lo que pusiste en el formulario. ¿Te mando fotos por si acaso?',conf:74,
+  perfil:{det:'Facebook · Lead Ads · campaña “Deptos Mitras”',
+   busca:[['home','Tipo','Depto en venta'],['cash','Presupuesto','~$3 M (formulario)'],['map-pin','Zona','Mitras (formulario)']],
+   zonas:['Mitras'],
+   comp:[['forms','Llenó','formulario Lead Ad'],['message-off','Sin respuesta','desde ayer']],
+   g:'B',s:62,temp:'frio',
+   bant:[['circle-dashed','#BA7517','Presupuesto','aproximado'],['circle-x','#A53A24','Decisor','sin confirmar'],['circle-dashed','#BA7517','Necesidad','poca info'],['circle-x','#A53A24','Tiempo','sin señal']],
+   sug:'Facebook da menos señal que inmuebles24 — solo el formulario, sin historial de búsqueda. Califícalo con 2–3 preguntas rápidas antes de invertir tiempo; por ahora va a reactivación con drip.'}},
+ {id:5,nombre:'Jorge Lozano',ini:'JL',fuente:'whatsapp',last:'Lo reviso con mi esposa y te digo',hora:'09:15',un:0,
+  msgs:[['nos','Hola Jorge, te mandé 3 casas en Cumbres. ¿Qué te parecieron?','09:02'],['lead','Lo reviso con mi esposa y te digo','09:15']],
+  draft:'Perfecto, Jorge. ¿Te aparto la visita del sábado? La cancelas sin problema si no se acomoda.',conf:81,
+  perfil:{det:'WhatsApp · mensaje directo al número del anuncio',
+   busca:[['home','Tipo','Casa en venta'],['cash','Presupuesto','$5–6 M'],['map-pin','Zona','Cumbres']],
+   zonas:['Cumbres'],
+   comp:[['message-2','Respondió','hace 6 h'],['users','Decide','en pareja']],
+   g:'B',s:72,temp:'tibio',
+   bant:[['circle-check','#3B6D11','Presupuesto','definido'],['circle-dashed','#BA7517','Decisor','decisión en pareja'],['circle-check','#3B6D11','Necesidad','zona clara'],['circle-dashed','#BA7517','Tiempo','sin urgencia']],
+   sug:'Decisión en pareja → mándale material que pueda compartir con su esposa (ficha + fotos) y propón una visita de fin de semana para los dos.'}},
+];
+let CURRENT=null;
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const meta={pipeline:['Pipeline','Tus leads y cómo avanza cada uno'],leads:['Leads','Directorio completo · fuente y asesor'],conversaciones:['Conversaciones','WhatsApp Business · respuestas asistidas'],inventario:['Inventario Easy Broker','Propiedades de EasyBroker rankeadas por el agente'],ventas:['Ventas','Ingresos, comisiones y cierres'],teamperf:['Team performance','Desempeño por asesor'],analitica:['Funnel performance','Conversión del funnel · 90 días'],libros:['Libros','Comisiones y objetivos'],moneymonday:['Money Monday','Junta semanal de números y pipeline'],oneonone:['1:1','Seguimiento uno a uno con asesores'],asesores:['Asesores','Directorio y gestión de asesores'],comisiones:['Libro de comisiones','Operaciones, comisiones y cobranza'],config:['Configuración','Ajustes de la cuenta y la operación'],automatizacion:['Reglas de automatización','Umbrales de autonomía y skills de cada agente'],agentesia:['Agentes IA','Los agentes que mueven la operación'],integraciones:['Integraciones','Fuentes de leads y canales']};
+function chip(c,ic,t){return '<span class="chip '+c+'">'+(ic?'<i class="ti ti-'+ic+'" style="font-size:12px"></i>':'')+t+'</span>'}
+const BRAND={inmuebles24:{n:'Inmuebles24',ic:'building-skyscraper',c:'#F2660A'},easybroker:{n:'EasyBroker',ic:'home-2',c:'#0F8C7E'},whatsapp:{n:'WhatsApp',ic:'brand-whatsapp',c:'#1FA855'},facebook:{n:'Facebook',ic:'brand-facebook',c:'#1877F2'}};
+function srcChip(f){const m=BRAND[f];return m?'<span class="srcb" style="background:'+m.c+'"><i class="ti ti-'+m.ic+'"></i>'+m.n+'</span>':''}
+function avSrc(ini,f){return '<div class="av">'+ini+'</div>'}
+function calif(l){if(l.g==='?')return chip('c-gray','','calificando');const c=l.g==='A'?'c-green':l.g==='B'?'c-gray':'c-coral';return chip(c,'',l.g+' · '+l.s)}
+function temp(t){const m={caliente:['c-coral','flame','Caliente'],tibio:['c-amber','temperature','Tibio'],frio:['c-blue','snowflake','Frío']}[t];return chip(m[0],m[1],m[2])}
+function agentTag(l){const a=etapaAgente[l.etapa];if(!a)return '';const st=l.aprobar?'espera aprobación':'trabajando';return chip(l.aprobar?'c-amber':'c-teal','robot',a.nombre.split(' ')[0]+' · '+st)}
+function bantFrom(l){
+ if(l.g==='A')return[['circle-check','#3B6D11','Presupuesto','acorde'],['circle-check','#3B6D11','Financiamiento','pre-aprobado'],['circle-check','#3B6D11','Decisor','sí'],['circle-check','#3B6D11','Zona y tipo','definidos'],['circle-dashed','#BA7517','Horizonte','1–3 meses']];
+ if(l.g==='B')return[['circle-check','#3B6D11','Presupuesto','acorde'],['circle-dashed','#BA7517','Financiamiento','por definir'],['circle-check','#3B6D11','Decisor','sí'],['circle-dashed','#BA7517','Zona y tipo','flexible'],['circle-dashed','#BA7517','Horizonte','3–6 meses']];
+ return[['circle-dashed','#BA7517','Presupuesto','ajustado'],['circle-x','#A53A24','Financiamiento','sin definir'],['circle-check','#3B6D11','Decisor','sí'],['circle-x','#A53A24','Zona y tipo','sin definir'],['circle-x','#A53A24','Horizonte','sin fecha']];
+}
+function tempWhy(t){if(t==='caliente')return[['message-2','Respondió','hace 2 h'],['eye','Abrió opciones','4 de 5'],['calendar','Pidió visita','hoy']];if(t==='tibio')return[['message-2','Respondió','ayer'],['eye','Abrió opciones','1 de 5']];return[['message-off','Sin respuesta','6 días'],['eye-off','No abrió','últimas opciones']];}
+function accionFrom(l){
+ if(l.g==='A'&&l.temp==='caliente')return['act','arrow-big-right-lines','Califica A y está caliente → prioridad máxima. Empújalo a cita.'];
+ if(l.g==='A'&&l.temp==='frio')return['act','clock-pause','Buen prospecto dormido → nurturing automático hasta que reactive.'];
+ if((l.g==='C')&&l.temp==='caliente')return['act','adjustments-alt','Quiere pero no califica → revisa si el inventario es el correcto.'];
+ return['act','arrow-right','Mantener en seguimiento del agente.'];
+}
+
+/* ---------- sidebar ---------- */
+function renderNav(){
+  const pend=leads.filter(l=>l.aprobar).length;
+  $('#nav').innerHTML=
+   '<div class="gl">Operación</div>'+
+   '<div class="it on" data-go="pipeline"><i class="ti ti-layout-kanban"></i>Pipeline<span class="bd">'+pend+'</span></div>'+
+   '<div class="it" data-go="leads"><i class="ti ti-address-book"></i>Leads</div>'+
+   '<div class="it" data-go="conversaciones"><i class="ti ti-brand-whatsapp"></i>Conversaciones</div>'+
+   '<div class="it" data-go="libros"><i class="ti ti-book"></i>Libros</div>'+
+   '<div class="gl">Analítica</div>'+
+   '<div class="it" data-go="ventas"><i class="ti ti-cash"></i>Ventas</div>'+
+   '<div class="it" data-go="teamperf"><i class="ti ti-users-group"></i>Team performance</div>'+
+   '<div class="it" data-go="analitica"><i class="ti ti-filter"></i>Funnel performance</div>'+
+   '<div class="gl">Automatizaciones + IA</div>'+
+   '<div class="it" data-go="agentesia"><i class="ti ti-robot"></i>Agentes IA</div>'+
+   '<div class="gl">Sistema Operativo</div>'+
+   '<div class="it" data-go="moneymonday"><i class="ti ti-coins"></i>Money Monday</div>'+
+   '<div class="it" data-go="oneonone"><i class="ti ti-users"></i>1:1</div>'+
+   '<div class="gl">Administración</div>'+
+   '<div class="it" data-go="asesores"><i class="ti ti-user-cog"></i>Asesores</div>'+
+   '<div class="it" data-go="config"><i class="ti ti-settings"></i>Configuración</div>';
+  document.querySelectorAll('#nav .it').forEach(el=>el.onclick=()=>go(el.dataset.go));
+}
+function go(key){
+  document.querySelectorAll('#nav .it').forEach(el=>el.classList.toggle('on',el.dataset.go===key));
+  if(meta[key])setTop(key);const c=$('#content');c.style.animation='none';void c.offsetWidth;
+  if(key.startsWith('ai:')){renderAIAgent(key.split(':')[1]);return;}
+  if(key==='agentesia'){c.innerHTML='<div class="view">'+viewAgentesIA('listing')+'</div>';return;}
+  if(key==='pipeline')c.innerHTML='<div class="view">'+viewPipeline()+'</div>';
+  else if(key==='leads')c.innerHTML='<div class="view">'+viewLeads()+'</div>';
+  else if(key==='conversaciones'){c.innerHTML='<div class="view">'+viewInbox()+'</div>';loadThread(12);}
+  else if(key==='inventario')c.innerHTML='<div class="view">'+viewInventario()+'</div>';
+  else if(key==='analitica'){c.innerHTML='<div class="view">'+viewAnalitica()+'</div>';animFunnel();}
+  else if(key==='automatizacion'){c.innerHTML='<div class="view">'+viewAuto()+'</div>';wireSeg();}
+  else if(key==='ventas'){c.innerHTML='<div class="view">'+viewVentas('cierres')+'</div>';}
+  else if(key==='teamperf')c.innerHTML='<div class="view">'+viewTeamPerf()+'</div>';
+  else if(key==='moneymonday')c.innerHTML='<div class="view">'+viewMoneyMonday()+'</div>';
+  else if(key==='asesores')c.innerHTML='<div class="view">'+viewAsesores()+'</div>';
+  else if(key==='libros')c.innerHTML='<div class="view">'+viewLibros('comisiones')+'</div>';
+  else if(key==='comisiones')c.innerHTML='<div class="view">'+viewComisiones()+'</div>';
+  else if(key==='oneonone')c.innerHTML='<div class="view">'+viewPlaceholder('users','1:1','Evaluación 1:1 del asesor: hard results y soft skills contra su resultado de negocio. Probablemente se fusione con Team performance.')+'</div>';
+  else if(key==='config')c.innerHTML='<div class="view">'+viewPlaceholder('settings','Configuración','Ajustes de la cuenta, la operación y las reglas del negocio.')+'</div>';
+  else if(key==='integraciones')c.innerHTML='<div class="view">'+viewIntegraciones()+'</div>';
+}
+function setTop(k){$('#vt').textContent=meta[k][0];$('#vs').textContent=meta[k][1];}
+function kpi(ic,l,v,tr,col){return '<div class="kpi"><div class="lb"><i class="ti ti-'+ic+'"></i>'+l+'</div><div class="vl"'+(col?' style="color:'+col+'"':'')+'>'+v+'</div><div class="tr">'+tr+'</div></div>';}
+
+/* ---------- PIPELINE (home, centrado en operación) ---------- */
+function kcard(l){
+  return '<div class="kcard '+(l.aprobar?'warn':'')+'" onclick="openDrawer('+l.id+')">'+
+    '<div class="r1"><span class="nm">'+l.nombre+'</span>'+calif(l)+'</div>'+
+    '<div class="r2">'+srcChip(l.fuente)+temp(l.temp)+'</div>'+
+    '<div class="ft">'+agentTag(l)+'<span style="margin-left:auto;font-size:11px;color:var(--text-3)">'+l.sla+'</span></div>'+
+  '</div>';
+}
+function viewPipeline(){
+  const pend=leads.filter(l=>l.aprobar);
+  const aprob=pend.map(l=>{const a=etapaAgente[l.etapa];return '<div class="qrow"><span class="ic">'+l.ini+'</span><div class="tx"><b>'+l.nombre+'</b><p>'+chip('c-teal','robot',a.nombre.split(' ')[0])+' confianza '+l.conf+'%</p></div><div class="rt">'+calif(l)+temp(l.temp)+'<button class="btn btn-p" onclick="event.stopPropagation();toast(\'Aprobado y enviado\')"><i class="ti ti-send"></i>Aprobar</button></div></div>';}).join('');
+  const board=AGENTES.map(a=>{const items=leads.filter(l=>l.etapa===a.etapa);return '<div class="col"><div class="col-h"><span class="nm"><i style="background:'+a.color+'"></i>'+a.etapa+'</span><span class="ag">'+a.nombre.split(' ')[0]+'</span><span class="ct">'+items.length+'</span></div>'+(items.map(kcard).join('')||'<div style="font-size:12px;color:var(--text-3);padding:8px 4px">—</div>')+'</div>';}).join('');
+  return ''+
+   '<div class="kpis">'+kpi('users','Leads activos','142','+18 esta semana')+kpi('hand-stop','Por aprobar',String(pend.length),'esperan humano','var(--amber-ink)')+kpi('alert-triangle','SLA en riesgo','3','> 2h sin respuesta','var(--coral-ink)')+kpi('calendar','Citas hoy','8','4 confirmadas')+'</div>'+
+   (pend.length?'<div class="panel"><h3>Por aprobar</h3><div class="ph">Lo que los agentes prepararon y espera tu visto bueno</div>'+aprob+'</div>':'')+
+   '<div class="board">'+board+'</div>';
+}
+
+/* ---------- LEADS ---------- */
+function viewLeads(){
+  const head='<div class="lhead"><span>Lead</span><span>Fuente</span><span>Etapa</span><span>Asesor</span><span>Calif.</span><span>Temp.</span></div>';
+  const rows=leads.map(l=>'<div class="lrow" onclick="openDrawer('+l.id+')"><div><span style="font-weight:500">'+l.nombre+'</span><div style="font-size:11.5px;color:var(--text-2)">'+l.tipo+' · '+l.zona+'</div></div><div>'+srcChip(l.fuente)+'</div><div>'+chip('c-teal','',l.etapa)+'</div><div style="font-size:12.5px"><i class="ti ti-user" style="font-size:13px;color:var(--text-3)"></i> '+l.asesor+'</div><div>'+calif(l)+'</div><div>'+temp(l.temp)+'</div></div>').join('');
+  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">'+chip('c-gray','user','Asesor: todos')+chip('c-gray','plug','Fuente: todas')+chip('c-gray','filter','Etapa: todas')+'<span style="margin-left:auto;font-size:12.5px;color:var(--text-2)">'+leads.length+' leads</span></div>'+head+rows;
+}
+
+/* ---------- recursos ---------- */
+function viewInbox(){return '<div class="convo-wrap"><div class="inbox"><div class="convos" id="convos"></div><div class="thread"><div class="th-h"><div class="av" id="thav">JD</div><div style="flex:1"><b id="thnm" style="font-size:14px;font-weight:500"></b><div id="thsrc" style="font-size:11.5px;color:var(--text-2)"></div></div><span class="online" title="en línea"></span></div><div class="msgs" id="msgs"></div><div class="suggest"><div class="slbl"><i class="ti ti-sparkles"></i>Respuesta sugerida por agente Matching</div><div class="draft" id="draft"></div><div class="confbar"><i id="cfill"></i></div><div style="font-size:11.5px;color:var(--text-2)">Confianza: <b id="cpct" style="color:var(--teal-ink)"></b></div><div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn btn-p" onclick="aprobarSug()"><i class="ti ti-send"></i>Aprobar y enviar</button><button class="btn"><i class="ti ti-edit"></i>Editar</button><div class="toggle">Auto-enviar si &gt;90%<div class="sw on" onclick="this.classList.toggle(\'on\')"><i></i></div></div></div></div></div></div><div class="profile" id="profile"></div></div>';}
+function renderConvos(active){$('#convos').innerHTML=convos.map(c=>'<div class="cv '+(c.id===active?'on':'')+'" onclick="loadThread('+c.id+')">'+avSrc(c.ini,c.fuente)+'<div class="tx"><b>'+c.nombre+'</b><p>'+c.last+'</p><div class="src">'+srcChip(c.fuente)+'</div></div><div class="si">'+c.hora+(c.un?'<br><span class="un">'+c.un+'</span>':'')+'</div></div>').join('');}
+function bubble(m){return '<div class="bub '+(m[0]==='lead'?'in':'out')+'">'+m[1]+'<span class="tm">'+m[2]+'</span></div>';}
+function scrollMsgs(){const m=$('#msgs');if(m)m.scrollTop=m.scrollHeight;}
+function loadThread(id){const c=convos.find(x=>x.id===id);CURRENT=c;renderConvos(id);
+  $('#thnm').textContent=c.nombre;$('#thav').textContent=c.ini;
+  $('#thsrc').innerHTML='<i class="ti ti-brand-whatsapp" style="font-size:13px;color:#25965a;vertical-align:-2px"></i> WhatsApp Business · llegó por '+(FUENTES[c.fuente]?FUENTES[c.fuente].n:c.fuente);
+  $('#msgs').innerHTML=c.msgs.map(bubble).join('');scrollMsgs();
+  const d=$('#draft');d.innerHTML='<span class="typing" style="background:transparent;padding:0;vertical-align:-3px"><i></i><i></i><i></i></span> <span style="color:var(--text-2)">redactando…</span>';$('#cfill').style.width='0%';$('#cpct').textContent='…';
+  clearTimeout(window._dt);window._dt=setTimeout(()=>{d.textContent=c.draft;$('#cfill').style.width=c.conf+'%';$('#cpct').textContent=c.conf+'%';document.querySelector('.suggest').style.opacity=1;},850);
+  renderProfile(c);
+}
+function renderProfile(c){const p=c.perfil;const gcls=p.g==='A'?'c-green':p.g==='B'?'c-gray':'c-coral';
+  $('#profile').innerHTML=
+   '<div class="pf-h">'+avSrc(c.ini,c.fuente)+'<div><div style="font-weight:500">'+c.nombre+'</div><div style="margin-top:4px">'+srcChip(c.fuente)+'</div></div></div>'+
+   '<div class="pf-sec"><h5><i class="ti ti-robot"></i>Scoring de la IA</h5><div class="scorebox"><div class="sc-top">'+chip(gcls,'',p.g+' · '+p.s)+temp(p.temp)+'</div>'+p.bant.map(b=>'<div class="pf-row"><i class="ti ti-'+b[0]+'" style="color:'+b[1]+'"></i>'+b[2]+'<span class="v">'+b[3]+'</span></div>').join('')+'<div class="sug-pill"><i class="ti ti-bulb" style="font-size:13px;margin-top:1px"></i><span>'+p.sug+'</span></div></div></div>'+
+   '<div class="pf-sec"><h5><i class="ti ti-route"></i>De dónde viene</h5><div style="font-size:12px;color:var(--text-2)">'+p.det+'</div></div>'+
+   '<div class="pf-sec"><h5><i class="ti ti-search"></i>¿Qué busca?</h5>'+p.busca.map(b=>'<div class="pf-row"><i class="ti ti-'+b[0]+'"></i>'+b[1]+'<span class="v">'+b[2]+'</span></div>').join('')+'<div class="pf-tags" style="margin-top:9px">'+p.zonas.map(z=>'<span class="tag">'+z+'</span>').join('')+'</div></div>'+
+   '<div class="pf-sec"><h5><i class="ti ti-activity"></i>Comportamiento</h5>'+p.comp.map(b=>'<div class="pf-row"><i class="ti ti-'+b[0]+'"></i>'+b[1]+'<span class="v">'+b[2]+'</span></div>').join('')+'</div>';
+}
+function aprobarSug(){if(!CURRENT)return;const n=new Date();const h=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);$('#msgs').insertAdjacentHTML('beforeend','<div class="bub out" style="animation:rise .3s ease both">'+CURRENT.draft+'<span class="tm">'+h+'</span></div>');scrollMsgs();$('#draft').innerHTML='<i class="ti ti-circle-check" style="color:var(--teal)"></i> Enviado por WhatsApp';document.querySelector('.suggest').style.opacity=.65;toast('Enviado por WhatsApp Business');}
+function viewInventario(){return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">'+chip('c-teal','sparkles','Matching para: Ana Sáenz · A·91')+'<span style="font-size:12.5px;color:var(--text-2)">Depto · San Pedro · $3–4.5M</span></div><div class="props">'+props.map(p=>'<div class="prop"><div class="thumb" style="background:'+p.c+'"><i class="ti ti-building-estate"></i><span class="match">'+p.match+'% match</span></div><div class="bd"><div class="pr">'+p.pr+'</div><div class="ad">'+p.t+' · '+p.z+'</div><div class="sp"><span><i class="ti ti-bed" style="font-size:15px"></i>'+p.rec+' rec</span><span><i class="ti ti-bath" style="font-size:15px"></i>'+p.ban+'</span><span><i class="ti ti-ruler-2" style="font-size:15px"></i>'+p.m2+' m²</span></div></div></div>').join('')+'</div>';}
+function funnelHTML(){const max=funnel[0][1];return funnel.map((f,i)=>{const w=Math.round(f[1]/max*100);const prev=i>0?funnel[i-1][1]:f[1];const conv=i>0?Math.round(f[1]/prev*100):100;const col=i===0?'#16293B':i===funnel.length-1?'#3B6D11':'#2563EB';return '<div class="frow"><div class="fl">'+f[0]+'</div><div class="ftrack"><div class="fbar" data-w="'+w+'" style="width:0;background:'+col+'">'+f[1].toLocaleString('es-MX')+'</div></div><div class="fc"><b>'+conv+'%</b></div></div>';}).join('');}
+function animFunnel(){requestAnimationFrame(()=>setTimeout(()=>document.querySelectorAll('.fbar').forEach(b=>b.style.width=b.dataset.w+'%'),60));}
+function viewAnalitica(){return '<div class="kpis">'+kpi('target-arrow','Conversión global','4.1%','lead → firma')+kpi('clock-bolt','1er contacto','6 min','meta &lt;5')+kpi('refresh','Reactivación','11%','de leads perdidos')+kpi('writing-sign','Firmados','41','este trimestre')+'</div><div class="panel"><h3>Funnel por etapa</h3><div class="ph">Conversión entre pasos · 90 días (datos de ejemplo)</div>'+funnelHTML()+'</div><div class="two"><div class="panel"><h3>Mayor caída</h3><div class="ph">Dónde se pierde más pipeline</div><div class="sla-row"><span>Opciones → Cita</span><b style="margin-left:auto">−45%</b></div><div class="sla-row"><span>Cita → Oferta</span><b style="margin-left:auto">−54%</b></div><div class="sla-row"><span>Oferta → Aceptada</span><b style="margin-left:auto">−36%</b></div></div><div class="panel"><h3>Transacciones en curso</h3><div class="ph">Cierre / notaría</div>'+deals.map(d=>'<div class="sla-row"><div><b style="font-weight:500">'+d.lead+'</b><div style="font-size:11.5px;color:var(--text-2)">'+d.prop+'</div></div><span style="margin-left:auto">'+chip('c-teal','',d.now)+'</span></div>').join('')+'</div></div>';}
+
+/* ---------- automatización (agentes) ---------- */
+function autoBlock(a){
+  let seg=a.modo==='asistir'?'<div class="seg" data-seg><span class="on">Solo asistir</span><span>Auto borradores</span></div>':'<div class="seg" data-seg><span>Solo sugerir</span><span class="on">Auto si &gt;'+a.umbral+'%</span><span>Full auto</span></div>';
+  const metric=a.correccion===null?'<div class="metric"><span class="n">78%</span><span class="u">sugerencias usadas</span></div>':'<div class="metric"><span class="n">'+a.correccion+'%</span><span class="u">tasa de corrección</span></div>';
+  const rec='<div class="rec '+a.rec[0]+'"><i class="ti ti-'+(a.rec[0]==='good'?'trending-up':'user-shield')+'" style="font-size:15px"></i>'+a.rec[1]+'</div>';
+  return '<div class="gridA"><div><div class="lbl">Autonomía</div>'+seg+'</div><div><div class="lbl">'+(a.correccion===null?'Asistencia':'Calidad')+'</div>'+metric+'</div></div>'+rec;
+}
+function wireSeg(){document.querySelectorAll('[data-seg] span').forEach(s=>s.onclick=()=>{s.parentNode.querySelectorAll('span').forEach(x=>x.classList.remove('on'));s.classList.add('on');toast('Autonomía actualizada');});}
+function viewAuto(){
+  const cards=AGENTES.map(a=>'<div class="ag-admin"><div class="top2"><b>'+a.nombre+'</b>'+chip('c-gray','','etapa: '+a.etapa)+(a.modo==='asistir'?chip('c-purple','','asistido'):chip('c-teal','','auto >'+a.umbral+'%'))+'<span class="auto">automatizado <b>'+a.auto+'%</b></span></div>'+autoBlock(a)+'<div class="skills" style="margin-top:13px;padding-top:12px;border-top:0.5px solid var(--line)">'+a.skills.map(s=>'<span class="sk"><i class="ti ti-check"></i>'+s+'</span>').join('')+'</div></div>').join('');
+  return '<div class="hint"><i class="ti ti-bulb" style="font-size:17px;color:var(--teal)"></i>Cada agente es el motor de una etapa del pipeline. Sube su autonomía conforme baja su tasa de corrección.</div>'+cards;
+}
+
+/* ---------- integraciones ---------- */
+function connCard(c){
+  const st=c.estado==='conectado'?chip('c-green','circle-check','conectado'):chip('c-amber','plug','por conectar');
+  const btns=c.estado==='conectado'?'<button class="btn" onclick="toast(\'Sincronizando '+c.nombre+'…\')"><i class="ti ti-refresh"></i>Sincronizar</button><button class="btn"><i class="ti ti-settings"></i>Configurar</button>':'<button class="btn btn-p" onclick="toast(\'Abriendo conexión con '+c.nombre+'\')"><i class="ti ti-plug-connected"></i>Conectar</button>';
+  return '<div class="conn"><div class="ch"><div class="lg" style="background:'+c.color+'"><i class="ti ti-'+c.icono+'" style="font-size:20px"></i></div><div><b>'+c.nombre+'</b><div style="font-size:11.5px;color:var(--text-2)">'+c.freq+'</div></div><span style="margin-left:auto">'+st+'</span></div><div class="mrow"><span>Última sincronización</span><span>'+c.sync+'</span></div><div class="mrow"><span>'+(c.tipo==='fuente'?'Leads hoy / total':'Mensajes hoy')+'</span><span>'+c.hoy+(c.tipo==='fuente'?' / '+c.total:'')+'</span></div><div style="display:flex;gap:9px;margin-top:13px">'+btns+'</div></div>';
+}
+function viewIntegraciones(){
+  const f=INTEGRACIONES.filter(c=>c.tipo==='fuente').map(connCard).join('');const ca=INTEGRACIONES.filter(c=>c.tipo==='canal').map(connCard).join('');
+  const log=SYNCS.map(s=>'<div class="synct"><span style="color:var(--text-2)">'+s[0]+'</span><span>'+s[1]+'</span><span>'+chip('c-green','','+'+s[2]+' nuevos')+'</span><span style="color:var(--text-2)">'+s[3]+' dup.</span><span>'+(s[4]?chip('c-coral','','1 error'):'<span style="color:var(--text-3)">ok</span>')+'</span></div>').join('');
+  return '<div class="hint"><i class="ti ti-plug-connected" style="font-size:17px;color:var(--teal)"></i>Las fuentes alimentan al agente Intake; los canales alimentan Conversaciones y el outreach.</div><div class="panel"><h3>Fuentes de leads</h3><div class="ph">Alimentan al agente Intake & Calificación</div><div class="conns">'+f+'</div></div><div class="panel"><h3>Canales de conversación</h3><div class="ph">Alimentan Conversaciones y el outreach</div><div class="conns">'+ca+'</div></div><div class="panel" style="margin-bottom:0"><h3>Registro de sincronizaciones</h3><div class="ph">Trazabilidad de todo lo extraído de las redes</div><div class="synct h"><span>Hora</span><span>Fuente</span><span>Nuevos</span><span>Duplicados</span><span>Estado</span></div>'+log+'</div>';
+}
+
+/* ===== AGENTES IA ===== */
+const ASESORES=[
+ {full:'Orlando García',ini:'OG',vendido:2.8,meta:3.0,citas:11,conv:38,pipe:{hot:5,citas:4,oferta:2,separ:1,cobrar:1,vendido:3},asist:'a tiempo',foco:'OK · buen ritmo',soft:{seguimiento:4,cierre:4,rapport:5,producto:4},senal:[['ok','Conversión 38% — la más alta del equipo'],['ok','Pipeline sano y balanceado'],['ok','Asistencia puntual']]},
+ {full:'Lucía Ramírez',ini:'LR',vendido:2.3,meta:3.0,citas:9,conv:33,pipe:{hot:6,citas:5,oferta:3,separ:2,cobrar:1,vendido:2},asist:'a tiempo',foco:'Acelerar separación',soft:{seguimiento:3,cierre:3,rapport:4,producto:5},senal:[['ok','Buen volumen de pipeline (19 ops)'],['alert','Se atora en separación: 3 ofertas → 2 separan'],['ok','Conversión media (33%)']]},
+ {full:'Diego Solís',ini:'DS',vendido:1.6,meta:3.0,citas:6,conv:25,pipe:{hot:3,citas:2,oferta:1,separ:0,cobrar:0,vendido:2},asist:'tarde',foco:'Darle más clientes',soft:{seguimiento:3,cierre:2,rapport:4,producto:3},senal:[['alert','Conversión 25% — la más baja del equipo'],['alert','Pipeline delgado (8 ops)'],['alert','Llegó tarde a la junta']]},
+];
+const OPS=[
+ ['#1042','Regina Salazar','O. García','$8.40M','$210k','Cobrada','app','12 may'],
+ ['#1041','Diego Martínez','L. Ramírez','$4.20M','$105k','Pendiente','app','—'],
+ ['#1039','Familia Garza','O. García','$6.10M','$153k','Cobrada','app','3 may'],
+ ['#0991','Cliente histórico A','D. Solís','$3.80M','$95k','Cobrada','histórica','feb'],
+ ['#0987','Cliente histórico B','L. Ramírez','$5.50M','$138k','Cobrada','histórica','ene'],
+];
+
+const CMAP={fac:'#2C7A9E',cob:'#A33B5C',ofr:'#B8923B',sin:'#94A0A8',r:'#C0392B',g:'#B8923B',t:'#2C7A9E'};
+const TOPCIERRE=[['Diego Cervantes',993],['Pamela Martinez',742],['Alejandro J. Mercadillo',681],['Michelle Iracheta',413],['Diana Salazar G.',391],['Gloria Gonzalez',376],['Alejandra Jaime',373],['Esmeralda Romero',348],['Antonio Valdivia',288],['Melissa Justo Ayala',243],['Samuel Higareda',242],['Mafer Rios',237],['Vania C. Bazua',201],['Perla Cavazos',197],['Mauricio Leal',161]];
+const PORCOBRAR=[['Pamela Martinez',705,'r'],['Gloria Gonzalez',360,'g'],['Diana A. Salazar',356,'g'],['Esmeralda Romero',235,'r'],['Melissa Justo Ayala',218,'r'],['Samuel Higareda',174,'t'],['Perla Cavazos',135,'g'],['Vania C. Bazua',98,'t'],['Alejandro Mercadillo',84,'t'],['Alma S. Luevano',67,'t'],['Antonio Valdivia',49,'t'],['Diego Cervantes',40,'t'],['Mauricio Leal',37,'t'],['Alejandra Jaime',28,'t'],['Maria A. Abrego',19,'t'],['(Blank)',13,'t']];
+const OFRECIM=[['Diego Cervantes',874,'r'],['Alejandro Mercadillo',597,'r'],['Michelle Iracheta',391,'r'],['Alejandra Jaime',345,'r'],['Antonio Valdivia',240,'g'],['Mafer Rios',237,'t'],['Esmeralda Romero',113,'r'],['Vania C. Bazua',104,'t'],['Diana Salazar',35,'t'],['Melissa Justo Ayala',25,'t'],['Pamela Martinez',19,'t'],['Marcela Trevino',16,'t'],['Samuel Higareda',15,'t']];
+const SCAT=[[5,0.05],[6,0.12],[7,0.08],[8,0.15],[9,0.06],[10,0.10],[11,0.13],[12,0.07],[14,0.05],[16,0.18],[18,0.09],[22,0.11],[26,0.06],[35,0.08],[42,0.10],[55,0.07],[80,0.27],[95,0.12],[120,0.11],[150,0.05],[185,0.07],[205,0.08]];
+const TREND=[['Sem 18',[['fac',203]],4],['Sem 19',[['fac',53]],11],['Sem 21',[['cob',2600],['ofr',3009]],25]];
+const OPSDET=[
+ [651,'Venta','Michelle Iracheta','$148,500','Monterrey','Sergio Tirado','Tentativamente se firma promesa el 23 de enero; ya se separó con 100k, promesa con 900k'],
+ [706,'Venta','Fernando Flores','$201,000','SPGG','Esthela Cleto','Casa en $7.8M, el vendedor quiere mínimo $7.2M; negocian si cierra en 7 mdp'],
+ [724,'Venta','Alejandra Jaime','$215,250','Valle Oriente','Alejandro Mtz','En espera de aceptación'],
+ [740,'Renta','Diego Cervantes','$180,000','Apodaca','Zoomlion','—'],
+ [769,'Renta','Michelle Iracheta','$28,000','—','Erika Gonzalez','Ofertó muy abajo; el depto es de 98, lo están revisando'],
+ [771,'Renta','Fernando Flores','$32,500','Mizza','Changjun Lee','—'],
+ [774,'Venta','Vania C. Bazua','$103,500','Lagos del Bosque','Rodrigo Garza','En espera de aceptación'],
+ [779,'Venta','Fernando Flores','$103,500','Lagos del Bosque','Rodrigo Garza','Esperando contrapropuesta'],
+ [783,'Venta','Antonio Valdivia','$119,700','Cumbres Elite','Gilberto Hernández','Propuesta aceptada; firma en ~1 mes al vender su otra propiedad'],
+];
+function kc(l,v,red){return '<div class="kc'+(red?' red':'')+'"><div class="l">'+l+'</div><div class="v"'+(red?' style="color:#C0392B"':'')+'>'+v+'</div></div>';}
+function kcRow(cards,maxw){return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px'+(maxw?';max-width:'+maxw:'')+'">'+cards+'</div>';}
+function legend(items){return '<div class="leg">'+items.map(i=>'<span><i style="background:'+i[1]+'"></i>'+i[0]+'</span>').join('')+'</div>';}
+function barList(items,maxV){return items.map(it=>{const w=Math.max(2,Math.round(it[1]/maxV*100));const col=it[2]?CMAP[it[2]]:'#3B82F6';return '<div class="pbar"><span class="pn">'+it[0]+'</span><span class="pt"><i style="width:'+w+'%;background:'+col+'"></i></span><span class="pv">'+it[1]+'K</span></div>';}).join('');}
+function pbiFilters(team){const f=(l,v)=>'<div class="flt"><div class="fl-l">'+l+'</div><div class="fl-v">'+v+' <i class="ti ti-chevron-down" style="font-size:12px;color:var(--text-3)"></i></div></div>';return '<div class="flts">'+f('Año','Año actual')+f('Mes','Mes actual')+f('Status de pago','All')+f('Asesor','All')+'<div class="flt"><div class="fl-l">Team</div><div style="display:flex;gap:4px;margin-top:1px">'+team.map(t=>'<span class="tchip">'+t+'</span>').join('')+'</div></div>'+f('Tipo de operación','All')+f('Ubicación','All')+'</div>';}
+function gauge(pct){const cx=120,cy=120,r=88,sw=20,pol=d=>{const a=(d-90)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];},arc=(s,e)=>{const[sx,sy]=pol(e),[ex,ey]=pol(s),la=(e-s)<=180?0:1;return 'M '+sx.toFixed(1)+' '+sy.toFixed(1)+' A '+r+' '+r+' 0 '+la+' 0 '+ex.toFixed(1)+' '+ey.toFixed(1);};const ve=-90+pct*180;return '<svg viewBox="0 0 240 140" style="width:100%;max-width:250px"><path d="'+arc(-90,90)+'" fill="none" stroke="#e7ebee" stroke-width="'+sw+'" stroke-linecap="round"/><path d="'+arc(-90,ve)+'" fill="none" stroke="#3B9E5E" stroke-width="'+sw+'" stroke-linecap="round"/><text x="120" y="110" text-anchor="middle" font-family="Bricolage Grotesque" font-size="36" font-weight="600" fill="#15242F">'+Math.round(pct*100)+'%</text><text x="120" y="131" text-anchor="middle" font-size="13" fill="#5C6973">$397K</text></svg>';}
+function funnelCierre(){const f=[['Facturado',0.4,'fac'],['Por cobrar',2.6,'cob'],['Ofrecimiento',3.3,'ofr'],['Sin Status',0.0,'sin']];return f.map(x=>'<div class="pbar" style="grid-template-columns:88px 1fr 42px"><span class="pn">'+x[0]+'</span><span class="pt"><i style="width:'+Math.max(2,Math.round(x[1]/3.3*100))+'%;background:'+CMAP[x[2]]+'"></i></span><span class="pv">'+x[1].toFixed(1)+'M</span></div>').join('');}
+function stackTrend(){const max=5767,fmt=n=>n>=1000?(n/1000).toFixed(1)+'M':n+'K';return '<div style="display:flex;align-items:flex-end;gap:22px;height:210px;padding:6px 8px 0">'+TREND.map(w=>{const tot=w[1].reduce((s,x)=>s+x[1],0);const segs=w[1].map(s=>'<div title="'+fmt(s[1])+'" style="height:'+(s[1]/max*170)+'px;background:'+CMAP[s[0]]+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600">'+(s[1]>=400?fmt(s[1]):'')+'</div>').join('');return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="font-size:11px;font-weight:600;margin-bottom:4px">'+fmt(tot)+'</div><div style="width:100%;max-width:72px;display:flex;flex-direction:column-reverse;border-radius:3px;overflow:hidden">'+segs+'</div><div style="font-size:10.5px;color:var(--text-3);margin-top:6px">'+w[2]+' ops</div><div style="font-size:11px;font-weight:500">'+w[0]+'</div></div>';}).join('')+'</div>';}
+function scatter(pts){const W=560,H=300,ml=44,mr=14,mt=22,mb=36,pw=W-ml-mr,ph=H-mt-mb,mX=210,mY=0.4,X=d=>ml+(d/mX)*pw,Y=c=>mt+ph-(c/mY)*ph;const dots=pts.map(p=>'<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="4" fill="#3F3F46" opacity="0.78"/>').join('');const yt=[0,0.1,0.2,0.3,0.4].map(v=>'<line x1="'+ml+'" y1="'+Y(v)+'" x2="'+(W-mr)+'" y2="'+Y(v)+'" stroke="#eef1f2"/><text x="'+(ml-6)+'" y="'+(Y(v)+3)+'" text-anchor="end" font-size="9" fill="#94A0A8">'+v.toFixed(1)+'M</text>').join('');const xt=[0,50,100,150,200].map(v=>'<text x="'+X(v)+'" y="'+(H-mb+16)+'" text-anchor="middle" font-size="9" fill="#94A0A8">'+v+'</text>').join('');return '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%"><rect x="'+ml+'" y="'+mt+'" width="'+(X(30)-ml).toFixed(1)+'" height="'+ph+'" fill="#FBE3DD" opacity="0.55"/><rect x="'+X(30).toFixed(1)+'" y="'+mt+'" width="'+(X(60)-X(30)).toFixed(1)+'" height="'+ph+'" fill="#FAEEDA" opacity="0.55"/><rect x="'+X(60).toFixed(1)+'" y="'+mt+'" width="'+(W-mr-X(60)).toFixed(1)+'" height="'+ph+'" fill="#E6F1FB" opacity="0.5"/><text x="'+(ml+4)+'" y="'+(mt+11)+'" font-size="9" fill="#A53A24">Op calientes</text><text x="'+(X(30)+4).toFixed(1)+'" y="'+(mt+11)+'" font-size="9" fill="#633806">Op tibias</text><text x="'+(X(60)+4).toFixed(1)+'" y="'+(mt+11)+'" font-size="9" fill="#0C447C">Op frías</text>'+yt+xt+dots+'<text x="'+(ml+pw/2)+'" y="'+(H-2)+'" text-anchor="middle" font-size="10" fill="#5C6973">Días desde que se separó la propiedad</text></svg>';}
+function vtCierres(){return pbiFilters(['Andrés Q.','M. Iracheta','S. Higareda'])+
+ kcRow(kc('Total Operaciones','63')+kc('Facturado','$397.4K')+kc('Por cobrar','$2.6M',true)+kc('En separación','—')+kc('Ofrecimiento','$3.3M')+kc('Portafolio (millones)','$19.0M'))+
+ '<div style="display:grid;grid-template-columns:1fr 1.05fr 1.25fr;gap:16px">'+
+  '<div class="panel" style="margin:0"><h3>Cumplimiento de venta</h3><div class="ph">Facturado vs meta del mes</div><div style="display:flex;justify-content:center">'+gauge(0.26)+'</div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);max-width:250px;margin:2px auto 0"><span>$0.0M</span><span>$1.5M</span></div><div style="margin-top:16px"><div class="lbl">Pipeline funnel</div>'+funnelCierre()+'</div></div>'+
+  '<div class="panel" style="margin:0"><h3>Top asesores</h3>'+legend([['Facturado',CMAP.fac],['Por cobrar',CMAP.cob],['Ofrecimiento',CMAP.ofr]])+barList(TOPCIERRE,993)+'</div>'+
+  '<div class="panel" style="margin:0"><h3>Tendencia de comisiones</h3><div class="ph">Comisión por semana · mayo 2026</div>'+legend([['Facturado',CMAP.fac],['Por cobrar',CMAP.cob],['Ofrecimiento',CMAP.ofr]])+stackTrend()+'</div>'+
+ '</div>';}
+function vtCobrar(){return pbiFilters(['M. Iracheta','S. Higareda'])+
+ kcRow(kc('Total Operaciones','28')+kc('Por cobrar','$2.6M',true),'440px')+
+ '<div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px">'+
+  '<div class="panel" style="margin:0"><h3>Comisión por cobrar</h3>'+legend([['1 op',CMAP.t],['2 ops',CMAP.g],['≥ 3 ops',CMAP.r]])+barList(PORCOBRAR,705)+'</div>'+
+  '<div class="panel" style="margin:0"><h3>Días desde separación vs tamaño de comisión</h3><div class="ph">Cada punto es una operación · entre más a la izquierda, más urgente de cobrar</div>'+scatter(SCAT)+'</div>'+
+ '</div>';}
+function vtOfrecim(){const det='<div class="dt-head"><span>ID</span><span>Op.</span><span>Asesor</span><span>Comisión</span><span>Zona</span><span>Cliente</span><span>Comentarios</span></div>'+OPSDET.map(o=>'<div class="dt-row"><span style="color:var(--text-3)">'+o[0]+'</span><span>'+o[1]+'</span><span>'+o[2]+'</span><span style="font-weight:500">'+o[3]+'</span><span style="color:var(--text-2)">'+o[4]+'</span><span>'+o[5]+'</span><span style="color:var(--text-2);font-size:11px;line-height:1.4">'+o[6]+'</span></div>').join('');return pbiFilters(['M. Iracheta','S. Higareda'])+
+ kcRow(kc('Total Operaciones','25')+kc('Ofrecimiento','$3.3M'),'440px')+
+ '<div style="display:grid;grid-template-columns:1fr 1.7fr;gap:16px">'+
+  '<div class="panel" style="margin:0"><h3>Operaciones en ofrecimiento</h3>'+legend([['1 op',CMAP.t],['2 ops',CMAP.g],['≥ 3 ops',CMAP.r]])+barList(OFRECIM,874)+'</div>'+
+  '<div class="panel" style="margin:0"><h3>Detalles de operación</h3>'+det+'</div>'+
+ '</div>';}
+function vtSoporte(){return viewPlaceholder('help','Soporte & FAQ','Cómo se calculan las comisiones, glosario de etapas y preguntas frecuentes del dashboard.');}
+function viewVentas(tab){tab=tab||'cierres';
+ const tabs=[['cierres','Cierres'],['cobrar','Por cobrar'],['ofrecim','Ofrecimientos'],['soporte','Soporte & FAQ']];
+ const head='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap"><div><div style="font-family:var(--fd);font-size:20px;font-weight:600">Dashboard de comisiones · mayo 2026</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">Última actualización: 26 may 2026 · 01:26 PM</div></div><div style="font-family:var(--fd);font-weight:600;color:#9a8a55;letter-spacing:.08em;font-size:15px">ESPACIO QUERIDO</div></div>';
+ const tabbar='<div class="tabs" style="margin-bottom:16px">'+tabs.map(t=>'<span class="tab '+(tab===t[0]?'on':'')+'" onclick="goVentas(\''+t[0]+'\')">'+t[1]+'</span>').join('')+'</div>';
+ return head+tabbar+({cierres:vtCierres,cobrar:vtCobrar,ofrecim:vtOfrecim,soporte:vtSoporte}[tab])();}
+function goVentas(tab){$('#content').innerHTML='<div class="view">'+viewVentas(tab)+'</div>';}
+function advisorCard(a){
+ const pct=Math.round(a.vendido/a.meta*100);const pipe=Object.values(a.pipe).reduce((s,x)=>s+x,0);
+ const fc=a.foco.startsWith('OK')?'c-green':a.foco.includes('más')?'c-coral':'c-amber';
+ const soft=[['Seguimiento',a.soft.seguimiento],['Cierre',a.soft.cierre],['Rapport',a.soft.rapport],['Conoc. producto',a.soft.producto]];
+ return '<div class="acard"><div class="ac-h"><div class="av">'+a.ini+'</div><div><b style="font-weight:500;font-size:15px">'+a.full+'</b><div style="font-size:11.5px;color:var(--text-2)">Asesor</div></div><div class="rt">'+chip(pct>=90?'c-green':pct>=60?'c-amber':'c-coral','',pct+'% de meta')+'</div></div>'+
+  '<div class="ac-m"><div class="m"><div class="l">Vendido / meta $'+a.meta+'M</div><div class="v">$'+a.vendido+'M</div></div><div class="m"><div class="l">Citas (mes)</div><div class="v">'+a.citas+'</div></div><div class="m"><div class="l">Conv. cita→cierre</div><div class="v">'+a.conv+'%</div></div><div class="m"><div class="l">Pipeline activo</div><div class="v">'+pipe+'</div></div></div>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div><div class="lbl">Soft skills</div>'+soft.map(s=>'<div class="skill"><span class="sl">'+s[0]+'</span><span class="st"><i style="width:'+(s[1]*20)+'%"></i></span><span class="sv">'+s[1]+'/5</span></div>').join('')+'</div><div><div class="lbl">Foco / lo que se le pide</div><div class="ac-foco">'+chip(fc,'target',a.foco)+'</div><div style="font-size:12px;color:var(--text-2);margin-top:9px;line-height:1.45">Para el 1:1: contrasta estos soft skills contra su resultado de negocio ($'+a.vendido+'M). Si el skill es alto y el número bajo, es volumen; si es al revés, es método.</div></div></div></div>';
+}
+function teamResumen(){
+ const tm=ASESORES.reduce((s,a)=>s+a.meta,0),tv=ASESORES.reduce((s,a)=>s+a.vendido,0),tp=Math.round(tv/tm*100);
+ const totPipe=ASESORES.reduce((s,a)=>s+Object.values(a.pipe).reduce((x,y)=>x+y,0),0);
+ const totCitas=ASESORES.reduce((s,a)=>s+a.citas,0);
+ const avgConv=Math.round(ASESORES.reduce((s,a)=>s+a.conv,0)/ASESORES.length);
+ const rank=[...ASESORES].sort((a,b)=>(b.vendido/b.meta)-(a.vendido/a.meta));
+ const bars=rank.map(a=>{const p=Math.round(a.vendido/a.meta*100);const col=p>=90?'#2563EB':p>=60?'#3B82F6':'#7C3AED';return '<div class="frow"><div class="fl" style="width:140px">'+a.full+'</div><div class="ftrack"><div class="fbar" style="width:'+Math.min(p,100)+'%;background:'+col+'">'+p+'%</div></div><div class="fc"><b>$'+a.vendido+'M</b></div></div>';}).join('');
+ const insights=ASESORES.map(a=>{const fc=a.foco.startsWith('OK')?'c-green':a.foco.includes('más')?'c-coral':'c-amber';return '<div style="padding:12px 0;border-bottom:0.5px solid var(--line)"><div style="display:flex;align-items:center;gap:9px"><div class="av" style="width:30px;height:30px;font-size:11px">'+a.ini+'</div><b style="font-weight:500">'+a.full+'</b><span style="margin-left:auto">'+chip(fc,'target',a.foco)+'</span></div><div style="margin-top:7px;padding-left:39px">'+a.senal.map(s=>'<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2);padding:2px 0"><i class="ti ti-'+(s[0]==='ok'?'circle-check':'alert-triangle')+'" style="font-size:13px;color:'+(s[0]==='ok'?'#3B6D11':'#BA7517')+'"></i>'+s[1]+'</div>').join('')+'</div></div>';}).join('');
+ return '<div class="kpis">'+kpi('cash','Vendido del equipo','$'+tv+'M','de $'+tm+'M · '+tp+'%')+kpi('target','Avance promedio',tp+'%','vs meta del mes')+kpi('folder','Pipeline activo',String(totPipe),'operaciones en curso')+kpi('calendar','Citas del mes',String(totCitas),'conv. prom. '+avgConv+'%')+'</div>'+
+  '<div class="two"><div class="panel"><h3>Ranking por avance de meta</h3><div class="ph">Quién va más cerca de su objetivo del mes</div>'+bars+'</div><div class="panel"><h3>Cómo llegamos a cada sugerencia</h3><div class="ph">Las señales que producen el punto de atención de cada asesor</div>'+insights+'</div></div>'+
+  '<div class="hint" style="margin-bottom:0"><i class="ti ti-arrow-right" style="color:var(--teal)"></i>Para el detalle de cada asesor (hard results + soft skills), abre la pestaña <b style="margin:0 3px">Por asesor</b>.</div>';
+}
+function viewTeamPerf(tab){
+ tab=tab||'resumen';
+ const tabbar='<div class="tabs"><span class="tab '+(tab==='resumen'?'on':'')+'" onclick="goTeam(\'resumen\')">Resumen</span><span class="tab '+(tab==='detalle'?'on':'')+'" onclick="goTeam(\'detalle\')">Por asesor</span></div>';
+ return tabbar+'<div style="margin-top:18px">'+(tab==='detalle'?ASESORES.map(advisorCard).join(''):teamResumen())+'</div>';
+}
+function goTeam(tab){$('#content').innerHTML='<div class="view">'+viewTeamPerf(tab)+'</div>';}
+function viewMoneyMonday(){
+ const head='<div class="mm-head"><span>Asesor</span><span>Asistencia</span><span>Hot</span><span>Citas</span><span>Oferta</span><span>Separ.</span><span>Cobrar</span><span>Vendido</span><span>Punto de atención</span></div>';
+ const rows=ASESORES.map(a=>{const fc=a.foco.startsWith('OK')?'c-green':a.foco.includes('más')?'c-coral':'c-amber';return '<div class="mm-row"><span style="font-weight:500">'+a.full+'</span><span>'+chip(a.asist==='tarde'?'c-amber':'c-green','',a.asist)+'</span><span>'+a.pipe.hot+'</span><span>'+a.pipe.citas+'</span><span>'+a.pipe.oferta+'</span><span>'+a.pipe.separ+'</span><span>'+a.pipe.cobrar+'</span><span style="font-weight:600">'+a.pipe.vendido+'</span><span>'+chip(fc,'',a.foco)+'</span></div>';}).join('');
+ return '<div class="hint"><i class="ti ti-coins" style="color:var(--teal)"></i>Junta de los lunes: asistencia, operaciones por etapa del pipeline y el punto de atención que se le asigna a cada asesor.</div>'+head+rows;
+}
+function viewAsesores(){
+ return '<div style="display:flex;align-items:center;margin-bottom:14px"><span style="font-size:12.5px;color:var(--text-2)">'+ASESORES.length+' asesores activos</span><button class="btn btn-p" style="margin-left:auto" onclick="toast(\'Alta de asesor\')"><i class="ti ti-user-plus"></i>Agregar asesor</button></div>'+
+  ASESORES.map(a=>{const pipe=Object.values(a.pipe).reduce((s,x)=>s+x,0);return '<div class="lrow" style="display:grid;grid-template-columns:1.7fr 1fr 1fr .9fr;gap:10px;align-items:center"><div style="display:flex;align-items:center;gap:11px"><div class="av">'+a.ini+'</div><div><b style="font-weight:500">'+a.full+'</b><div style="font-size:11.5px;color:var(--text-2)">Asesor · activo</div></div></div><div style="font-size:12.5px;color:var(--text-2)"><i class="ti ti-folder" style="font-size:13px"></i> '+pipe+' en pipeline</div><div style="font-size:12.5px;color:var(--text-2)"><i class="ti ti-cash" style="font-size:13px"></i> $'+a.vendido+'M este mes</div><div>'+chip('c-blue','',Math.round(a.vendido/a.meta*100)+'% meta')+'</div></div>';}).join('');
+}
+function viewComisiones(){
+ const head='<div class="led-head"><span>#</span><span>Cliente</span><span>Asesor</span><span>Monto</span><span>Comisión</span><span>Estado</span><span>Origen</span><span>Fecha</span></div>';
+ const rows=OPS.map(o=>'<div class="led-row"><span style="color:var(--text-2)">'+o[0]+'</span><span style="font-weight:500">'+o[1]+'</span><span>'+o[2]+'</span><span>'+o[3]+'</span><span style="font-weight:600">'+o[4]+'</span><span>'+chip(o[5]==='Cobrada'?'c-green':'c-amber','',o[5])+'</span><span>'+chip(o[6]==='app'?'c-blue':'c-gray','',o[6])+'</span><span style="color:var(--text-2)">'+o[7]+'</span></div>').join('');
+ return '<div class="hint"><i class="ti ti-book-2" style="color:var(--teal)"></i>Cada lead cerrado se vuelve una operación aquí. Las nuevas llegan solas desde la app; puedes agregar operaciones históricas a mano.</div><div style="display:flex;align-items:center;margin-bottom:14px"><span style="font-size:12.5px;color:var(--text-2)">'+OPS.length+' operaciones · 2 históricas, 3 desde la app</span><button class="btn btn-p" style="margin-left:auto" onclick="toast(\'Agregar operación histórica\')"><i class="ti ti-plus"></i>Agregar operación histórica</button></div>'+head+rows;
+}
+
+/* ===== AGENTES IA ===== */
+function viewObjetivos(){
+ const tm=ASESORES.reduce((s,a)=>s+a.meta,0),tv=ASESORES.reduce((s,a)=>s+a.vendido,0),tp=Math.round(tv/tm*100);
+ const rows=ASESORES.map(a=>{const p=Math.round(a.vendido/a.meta*100);return '<div class="lrow" style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:10px;align-items:center"><div style="font-weight:500">'+a.full+'</div><div style="font-size:12.5px;color:var(--text-2)">Meta $'+a.meta+'M</div><div style="font-size:12.5px;color:var(--text-2)">Vendido $'+a.vendido+'M</div><div>'+chip(p>=90?'c-green':p>=60?'c-amber':'c-coral','',p+'%')+'</div></div>';}).join('');
+ return '<div class="panel"><h3>Objetivo del equipo · este mes</h3><div class="ph">Meta combinada de los asesores</div><div style="display:flex;align-items:baseline;gap:10px;margin-bottom:13px"><span style="font-family:var(--fd);font-size:32px;font-weight:600">$'+tv+'M</span><span style="color:var(--text-2)">de $'+tm+'M · '+tp+'%</span></div><div class="bigbar"><i style="width:'+tp+'%"></i></div></div>'+
+  '<div class="lhead" style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:10px"><span>Asesor</span><span>Meta</span><span>Vendido</span><span>Avance</span></div>'+rows+
+  '<div class="chip c-gray" style="margin-top:14px"><i class="ti ti-pencil" style="font-size:12px"></i>Objetivos editables — dime si quieres metas por trimestre, por etapa o por fuente</div>';
+}
+function viewLibros(tab){
+ tab=tab||'comisiones';
+ const tabbar='<div class="tabs"><span class="tab '+(tab==='comisiones'?'on':'')+'" onclick="goLibros(\'comisiones\')">Libro de comisiones</span><span class="tab '+(tab==='objetivos'?'on':'')+'" onclick="goLibros(\'objetivos\')">Objetivos</span></div>';
+ return tabbar+'<div style="margin-top:18px">'+(tab==='objetivos'?viewObjetivos():viewComisiones())+'</div>';
+}
+function goLibros(tab){$('#content').innerHTML='<div class="view">'+viewLibros(tab)+'</div>';}
+function viewPlaceholder(ic,title,desc){
+ return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:60vh;color:var(--text-2)"><div style="width:64px;height:64px;border-radius:16px;background:var(--teal-tint);color:var(--teal-ink);display:flex;align-items:center;justify-content:center;margin-bottom:16px"><i class="ti ti-'+ic+'" style="font-size:30px"></i></div><div style="font-family:var(--fd);font-weight:500;font-size:22px;color:var(--text)">'+title+'</div><div style="font-size:13.5px;max-width:400px;margin-top:8px;line-height:1.5">'+desc+'</div><div class="chip c-gray" style="margin-top:16px"><i class="ti ti-pencil" style="font-size:12px"></i>En definición — me dices qué va aquí</div></div>';
+}
+const AGENTS_AI=[
+ {id:'listing',n:'Listing Manager',ic:'building-skyscraper',color:'#F2660A',rol:'Consulta y sincroniza los listings y leads de Inmuebles24.'},
+ {id:'calificador',n:'Calificador',ic:'gauge',color:'#2563EB',rol:'Califica en todas las pantallas, con todos los inputs: conversación, opciones y notas.'},
+ {id:'lovebomber',n:'Love Bomber',ic:'heart-handshake',color:'#E2563B',rol:'Envía opciones a los leads calientes. Máximo 5 envíos por día.'},
+ {id:'scheduler',n:'Scheduler',ic:'calendar-clock',color:'#7C3AED',rol:'Agenda citas con asesores humanos y coordina Google Calendar.'},
+ {id:'reminder',n:'Reminder',ic:'bell-ringing',color:'#0891B2',rol:'Confirma asistencia a las citas y recupera no-shows.'},
+];
+function ini(name){return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+function aiHero(a,extra){return '<div class="ahead"><span class="chip" style="background:'+a.color+'22;color:'+a.color+'"><i class="ti ti-'+a.ic+'" style="font-size:13px"></i>'+a.n+'</span>'+chip('c-teal','','● activo')+(extra||'')+'</div><div class="adesc">'+a.rol+'</div>';}
+function flowHTML(){
+ const ai=t=>'<span class="fp ai">'+t+'</span>',hu=t=>'<span class="fp hum">'+t+'</span>',ar='<span class="ar">→</span>';
+ return '<div class="flow">'+ai('Pull · Listing')+ar+ai('Calificación')+ar+ai('Opciones · Love Bomber')+ar+ai('Cita · Scheduler')+ar+hu('Negociación')+ar+hu('Separación')+ar+hu('Notaría')+ar+hu('Por cobrar')+ar+hu('Cerrado')+'</div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:11px"><span class="loop"><i class="ti ti-rotate-2" style="font-size:11px"></i>¿No le gustó la cita? → vuelve a Opciones</span><span class="loop"><i class="ti ti-rotate-2" style="font-size:11px"></i>¿No aceptan en negociación? → vuelve a Opciones</span></div>'+
+  '<div style="font-size:12px;color:var(--text-2);margin-top:11px;display:flex;gap:7px;align-items:flex-start"><i class="ti ti-info-circle" style="font-size:14px;color:var(--teal);margin-top:1px"></i>Después de la cita la operación la llevan los humanos (CRM). Los agentes solo intervienen con insights si un lead se atora o no se actualiza.</div>';
+}
+function renderAIAgent(id){const a=AGENTS_AI.find(x=>x.id===id);$('#vt').textContent=a.n;$('#vs').textContent='Agente IA · '+a.rol.replace(/\.$/,'');const c=$('#content');const v={listing:viewListing,calificador:viewCalificador,lovebomber:viewLoveBomber,scheduler:viewScheduler,reminder:viewReminder}[id];c.innerHTML='<div class="view">'+v()+'</div>';}
+const AI_TABS=[['listing','Listing Manager'],['calificador','Calificador'],['lovebomber','Love Bomber'],['scheduler','Scheduler'],['reminder','Reminder'],['inventario','Inventario Easy Broker'],['integraciones','Integraciones'],['reglas','Reglas de automatización']];
+function viewAgentesIA(tab){
+ tab=tab||'listing';
+ const tabbar='<div class="tabs" style="flex-wrap:wrap">'+AI_TABS.map(t=>'<span class="tab '+(tab===t[0]?'on':'')+'" onclick="goAI(\''+t[0]+'\')">'+t[1]+'</span>').join('')+'</div>';
+ const views={listing:viewListing,calificador:viewCalificador,lovebomber:viewLoveBomber,scheduler:viewScheduler,reminder:viewReminder,inventario:viewInventario,integraciones:viewIntegraciones,reglas:viewAuto};
+ return tabbar+'<div style="margin-top:18px">'+views[tab]()+'</div>';
+}
+function goAI(tab){$('#content').innerHTML='<div class="view">'+viewAgentesIA(tab)+'</div>';if(tab==='reglas')wireSeg();}
+
+function viewListing(){
+ const a=AGENTS_AI[0];
+ const pulled=[['Jonathan Domínguez','10:42','En conversación con IA','c-blue'],['María Treviño','10:42','En conversación con IA','c-blue'],['Familia Garza','10:24','En shower (visita en curso)','c-purple'],['Sofía Elizondo','10:24','Cita agendada','c-purple'],['Carlos Vega','10:42','Calificando','c-gray'],['Roberto Niño','10:11','En conversación con IA','c-blue']];
+ const log=[['10:42',8,2,0],['10:24',6,1,0],['10:11',3,0,0],['09:58',5,1,1]];
+ return aiHero(a,chip('c-amber','clock','próximo pull en 1 min'))+
+  '<div class="kpis" style="grid-template-columns:repeat(3,1fr)">'+kpi('cloud-download','Último pull','10:42','hace 4 min · 8 nuevos, 2 dup.')+kpi('clock-play','Próximo pull','1 min','cadencia: cada 5 min')+kpi('building-skyscraper','Listings vigilados','142','en Inmuebles24')+'</div>'+
+  '<div class="two">'+
+   '<div class="panel"><h3>Leads traídos de Inmuebles24</h3><div class="ph">Cada lead con su hora de pull y en qué etapa va ahora</div>'+pulled.map(p=>'<div class="qrow"><span class="ic">'+ini(p[0])+'</span><div class="tx"><b>'+p[0]+'</b><p><i class="ti ti-cloud-download" style="font-size:12px"></i> pull '+p[1]+'</p></div><div class="rt">'+chip(p[3],'',p[2])+'</div></div>').join('')+'</div>'+
+   '<div class="panel"><h3>Registro de pulls</h3><div class="ph">Trazabilidad de cada sincronización con Inmuebles24</div><div class="synct h"><span>Hora</span><span>Nuevos</span><span>Duplicados</span><span>Estado</span></div>'+log.map(s=>'<div class="synct" style="grid-template-columns:64px 1fr 1fr 1fr"><span style="color:var(--text-2)">'+s[0]+'</span><span>'+chip('c-green','','+'+s[1]+'')+'</span><span style="color:var(--text-2)">'+s[2]+'</span><span>'+(s[3]?chip('c-coral','','1 error'):'<span style="color:var(--text-3)">ok</span>')+'</span></div>').join('')+'</div>'+
+  '</div>'+
+  '<div class="panel"><h3>El proceso completo</h3><div class="ph">Cómo encajan los agentes y dónde entra el humano</div>'+flowHTML()+'</div>';
+}
+function viewCalificador(){
+ const a=AGENTS_AI[1];
+ const inputs=[['message-2','Conversación de WhatsApp'],['send','Opciones enviadas y abiertas'],['note','Notas del asesor'],['activity','Comportamiento en Inmuebles24'],['forms','Formulario (Facebook)']];
+ const feed=[['María Treviño','B','A','respondió y pidió visita','hace 5 min'],['Pablo Cárdenas','C','B','llenó el formulario de Lead Ad','hace 1 h'],['Jorge Lozano','B','B','abrió 1 de 3 opciones','hace 2 h'],['Carlos Vega','—','C','recién ingresado, falta info','hace 3 h']];
+ return aiHero(a,chip('c-blue','layers-intersect','transversal · todas las pantallas'))+
+  '<div class="panel"><h3>Qué mira para calificar</h3><div class="ph">Combina todas las señales — no depende de una sola pantalla ni de un solo input</div><div class="flow">'+inputs.map(i=>'<span class="fp"><i class="ti ti-'+i[0]+'" style="font-size:12px;color:var(--teal)"></i>'+i[1]+'</span>').join('')+'<span class="ar">→</span><span class="fp ai"><i class="ti ti-gauge" style="font-size:12px"></i>Calificación + Temperatura</span></div></div>'+
+  '<div class="panel" style="margin-bottom:0"><h3>Recalificaciones recientes</h3><div class="ph">Cada vez que llega una señal nueva, recalcula al instante</div>'+feed.map(f=>'<div class="qrow"><span class="ic">'+ini(f[0])+'</span><div class="tx"><b>'+f[0]+'</b><p>'+f[3]+' · '+f[4]+'</p></div><div class="rt">'+(f[1]!=='—'?'<span style="font-size:12px;color:var(--text-3)">'+f[1]+'</span><i class="ti ti-arrow-right" style="font-size:13px;color:var(--text-3)"></i>':'')+chip('c-green','',f[2])+'</div></div>').join('')+'</div>';
+}
+function viewLoveBomber(){
+ const a=AGENTS_AI[2];
+ const cols=[['En cola · calientes',[['Ana Sáenz','A·91','5 opciones listas'],['Diego Martínez','A·89','3 opciones listas']]],['Opciones enviadas hoy',[['Jonathan Domínguez','A·86','5 enviadas · 10:33'],['María Treviño','A·87','4 enviadas · 09:50']]],['Respondió',[['Jonathan Domínguez','A·86','quiere ver Valle Oriente']]],['Listo para cita',[['Jonathan Domínguez','A·86','→ pasar a Scheduler']]]];
+ return aiHero(a,chip('c-amber','','3 de 5 envíos usados hoy'))+
+  '<div class="hint"><i class="ti ti-info-circle" style="color:var(--teal)"></i>Regla: máximo 5 envíos por día y solo a leads <b>calientes</b>. Los tibios quedan en espera; los fríos pasan a Reactivación.</div>'+
+  '<div class="board">'+cols.map(c=>'<div class="col"><div class="col-h"><span class="nm">'+c[0]+'</span><span class="ct">'+c[1].length+'</span></div>'+c[1].map(x=>'<div class="kcard"><div class="r1"><span class="nm">'+x[0]+'</span>'+chip('c-green','',x[1])+'</div><div class="r2" style="font-size:11.5px;color:var(--text-2)">'+x[2]+'</div>'+(c[0]==='Respondió'?'<div class="ft"><button class="btn btn-p" style="padding:5px 11px;font-size:12px" onclick="toast(\'Cita asignada → Scheduler\')"><i class="ti ti-calendar-plus"></i>Agendar cita</button></div>':'')+'</div>').join('')+'</div>').join('')+'</div>'+
+  '<div class="panel" style="margin-top:16px;margin-bottom:0"><h3>En espera (tibios)</h3><div class="ph">No se les envía aún — se nutren hasta que suban de temperatura</div>'+['Sofía Elizondo · B·75','Jorge Lozano · B·72'].map(t=>'<div class="sla-row"><i class="ti ti-clock-pause" style="color:var(--amber-ink)"></i>'+t+'</div>').join('')+'</div>';
+}
+function viewScheduler(){
+ const a=AGENTS_AI[3];
+ const citas=[['Familia Garza','O. García','Hoy 17:00','confirmada','c-green',false],['Sofía Elizondo','D. Sol','Mañana 11:00','enviada · sin responder','c-amber',false],['Jonathan Domínguez','— por asignar','Propone mañana 11:00 o jueves PM','por confirmar','c-gray',true],['Diego Martínez','L. Ramírez · asesor solicitado','Por agendar (llamada)','por confirmar','c-gray',true]];
+ return aiHero(a,chip('c-green','brand-google','Google Calendar conectado'))+
+  '<div class="kpis" style="grid-template-columns:repeat(3,1fr)">'+kpi('calendar-check','Citas hoy','8','4 confirmadas')+kpi('calendar-plus','Por asignar','2','esperando asesor')+kpi('user-check','Asesores activos','3','O. García · L. Ramírez · D. Sol')+'</div>'+
+  '<div class="panel"><h3>Citas y asignación</h3><div class="ph">Asigna al asesor humano, sincroniza Google Calendar y manda la confirmación</div>'+citas.map(c=>'<div class="qrow"><span class="ic"><i class="ti ti-calendar-event"></i></span><div class="tx"><b>'+c[0]+'</b><p><i class="ti ti-user" style="font-size:12px"></i> '+c[1]+' · '+c[2]+'</p></div><div class="rt">'+chip(c[4],'',c[3])+(c[5]?'<button class="btn" style="padding:5px 10px;font-size:12px" onclick="toast(\'Asignando asesor y sincronizando calendario…\')"><i class="ti ti-user-plus"></i>Asignar</button>':'')+'</div></div>').join('')+'</div>'+
+  '<div class="panel" style="margin-bottom:0"><h3>¿El cliente quiere hablar con un asesor?</h3><div class="ph">El Scheduler también enruta solicitudes de asesoría a una persona</div><div class="sla-row"><i class="ti ti-headset" style="color:var(--teal)"></i>Diego Martínez pidió hablar con alguien → asignado a L. Ramírez<span style="margin-left:auto">'+chip('c-blue','','llamada agendada')+'</span></div></div>';
+}
+function viewReminder(){
+ const a=AGENTS_AI[4];
+ const cols=[['Recordatorio enviado',['Familia Garza · hoy 17:00','Sofía Elizondo · mañana 11:00']],['Confirmó · va mañana',['Sofía Elizondo']],['Respondió positivo',['Familia Garza · “ahí estaré”']],['Canceló',['Roberto Niño · reagendar']],['Sin respuesta',['Karla Méndez']]];
+ return aiHero(a,chip('c-blue','','recordatorios de hoy: 5'))+
+  '<div class="hint"><i class="ti ti-info-circle" style="color:var(--teal)"></i>Mueve cada lead según cómo respondió al recordatorio. Las cancelaciones regresan al Scheduler para reagendar.</div>'+
+  '<div class="board">'+cols.map(c=>'<div class="col"><div class="col-h"><span class="nm">'+c[0]+'</span><span class="ct">'+c[1].length+'</span></div>'+c[1].map(x=>'<div class="kcard"><div class="r1"><span class="nm" style="font-size:12.5px">'+x+'</span></div></div>').join('')+'</div>').join('')+'</div>';
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(id){
+  const l=leads.find(x=>x.id===id);const ag=etapaAgente[l.etapa];
+  const gcol=l.g==='A'?'#27500A':l.g==='B'?'#52606a':'#A53A24';const gcls=l.g==='A'?'c-green':l.g==='B'?'c-gray':'c-coral';
+  const califBox=l.g==='?'
+    ?'<div class="axbox"><div class="at">Calificación — ¿puede comprar?</div><div style="margin:9px 0;font-size:12.5px;color:var(--text-2)"><i class="ti ti-loader" style="color:var(--teal)"></i> El agente Intake la está calculando (BANT).</div></div>'
+    :'<div class="axbox"><div class="at">Calificación — ¿puede comprar?</div><div style="display:flex;align-items:baseline;gap:7px;margin:6px 0 9px"><span style="font-size:24px;font-weight:500;color:'+gcol+'">'+l.g+'</span>'+chip(gcls,'',l.s+' / 100')+'</div>'+bantFrom(l).map(b=>'<div class="arow"><i class="ti ti-'+b[0]+'" style="color:'+b[1]+';font-size:15px"></i>'+b[2]+'<span class="v">'+b[3]+'</span></div>').join('')+'</div>';
+  const tempBox='<div class="axbox"><div class="at">Temperatura — ¿qué tan activo?</div><div style="margin:6px 0 9px">'+temp(l.temp)+'</div>'+tempWhy(l.temp).map(w=>'<div class="arow"><i class="ti ti-'+w[0]+'" style="color:var(--teal);font-size:15px"></i>'+w[1]+'<span class="v">'+w[2]+'</span></div>').join('')+'<div class="arow" style="color:var(--text-3);font-size:11px;padding-top:6px"><i class="ti ti-refresh" style="font-size:13px"></i>se recalcula solo</div></div>';
+  const ac=accionFrom(l);
+  const msg='¡Hola '+l.nombre.split(' ')[0]+'! Con base en lo que buscas ('+l.tipo.toLowerCase()+' en '+l.zona+'), seleccioné 5 opciones que encajan con tu presupuesto. Te las comparto por WhatsApp. ¿Agendamos una visita esta semana?';
+  $('#drawer').innerHTML='<div class="dr-h"><span class="cl" onclick="closeDrawer()"><i class="ti ti-x" style="font-size:22px"></i></span><div class="nm">'+l.nombre+'</div><div class="mt">'+calif(l)+temp(l.temp)+srcChip(l.fuente)+chip('c-gray','map-pin',l.tipo+' · '+l.zona)+agentTag(l)+'</div></div>'+
+   '<div class="dr-bd">'+
+     '<div class="section"><h4>Scoring</h4><div class="axes">'+califBox+tempBox+'</div><div class="'+ac[0]+'" style="margin-top:12px"><i class="ti ti-'+ac[1]+'" style="font-size:16px;margin-top:1px"></i><div><b style="font-weight:500">Siguiente acción:</b> '+ac[2]+'</div></div></div>'+
+     '<div class="copilot"><div class="ch"><i class="ti ti-sparkles"></i>Sugerencia del agente '+ag.nombre.split(' ')[0]+'</div><div class="draft">'+msg+'</div><div class="confbar"><i style="width:92%"></i></div><div style="font-size:11.5px;color:var(--text-2);margin-bottom:13px">Confianza: <b style="color:var(--teal-ink)">92%</b> · 5 propiedades listas</div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-p" onclick="toast(\'Opciones enviadas por WhatsApp\');closeDrawer()"><i class="ti ti-send"></i>Aprobar y enviar</button><button class="btn"><i class="ti ti-edit"></i>Editar</button><button class="btn"><i class="ti ti-player-skip-forward"></i>Reasignar</button></div></div>'+
+     '<div class="section"><h4>Propiedades sugeridas</h4>'+props.map(p=>'<div class="mp"><span class="tn" style="background:'+p.c+'"><i class="ti ti-home" style="font-size:17px"></i></span><div><div style="font-weight:500">'+p.pr+'</div><div style="font-size:11.5px;color:var(--text-2)">'+p.z+'</div></div><span class="mm">'+p.match+'%</span></div>').join('')+'</div>'+
+     '<div class="section"><h4>Actividad y trazabilidad</h4><div class="tl"><div class="ev"><div class="et">Entró por '+(FUENTES[l.fuente]?FUENTES[l.fuente].n:l.fuente)+' · #'+l.ext+'</div><div class="ed">sincronización · hoy 10:31</div></div><div class="ev"><div class="et">Asignado a '+l.asesor+'</div><div class="ed">automático · 10:31</div></div><div class="ev"><div class="et">Calificado por Intake — '+(l.g==='?'?'en proceso':l.g+' · '+l.s)+'</div><div class="ed">automático</div></div><div class="ev"><div class="et">'+ag.nombre.split(' ')[0]+' está trabajando este lead</div><div class="ed">'+(l.aprobar?'esperando aprobación':'en curso')+'</div></div></div></div>'+
+     '<div class="section"><h4>Si no avanza — motivo</h4><div style="font-size:12px;color:var(--text-2);margin-bottom:4px">Se alimenta al matching para la próxima vuelta.</div><div class="reject"><select><option>Precio fuera de rango</option><option>Zona no convenció</option><option>No es el momento</option><option>Encontró con otra inmobiliaria</option><option>Dejó de responder</option></select><button class="btn" onclick="toast(\'Enviado a Reactivación\');closeDrawer()"><i class="ti ti-archive"></i>A reactivación</button></div></div>'+
+   '</div>';
+  $('#drawer').classList.add('on');$('#scrim').classList.add('on');
+}
+function closeDrawer(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on');}
+let tt;function toast(m){$('#tmsg').textContent=m;$('#toast').classList.add('on');clearTimeout(tt);tt=setTimeout(()=>$('#toast').classList.remove('on'),2400);}
+
+renderNav();go('pipeline');
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+</script>
+</body>
+</html>

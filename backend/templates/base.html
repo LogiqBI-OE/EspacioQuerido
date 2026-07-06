@@ -1,0 +1,103 @@
+{% load static %}
+<!doctype html>
+<html lang="es" class="theme-light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}{{ page_title }} · Espacio Querido{% endblock %}</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '.theme-dark'],
+      theme: { extend: {
+        colors: {
+          page:'var(--page)', card:'var(--card)', elevated:'var(--elevated)',
+          'table-header':'var(--table-header)', border:'var(--border)',
+          text:'var(--text)', muted:'var(--muted)', accent:'var(--accent-view)',
+          'side-bg':'var(--side-bg)', 'side-text':'var(--side-text)', 'side-muted':'var(--side-muted)',
+        },
+        fontFamily: { sans:['Inter','system-ui','Segoe UI','sans-serif'] },
+      }},
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  {% block head_extra %}{% endblock %}
+  <style>
+    :root{
+      --page:#f4f6f9; --card:#fff; --elevated:#eef1f6; --table-header:#eef1f6;
+      --border:#e3e7ee; --text:#111827; --muted:#6b7280;
+      --side-bg:#17181d; --side-text:#d9dbe1; --side-muted:#82868f; --side-active-bg:rgba(255,255,255,.06);
+      --accent-operativa:#4f46e5; --accent-admin:#8a1c3b; --accent-developer:#7c3aed;
+      --accent-view:var(--accent-operativa);
+    }
+    .theme-dark{
+      --page:#0f1116; --card:#171a21; --elevated:#1e222b; --table-header:#1e222b;
+      --border:#262b36; --text:#e6e8ee; --muted:#9aa1ad;
+      --side-bg:#121317; --side-text:#d9dbe1; --side-muted:#7c828d; --side-active-bg:rgba(255,255,255,.05);
+    }
+    /* raíz tipográfica más compacta: escala todo (rem) hacia abajo */
+    html{ font-size:13.5px; }
+    body{ background:var(--page); color:var(--text); }
+    [x-cloak]{ display:none !important; }
+    /* scrollbar del contenido (claro/tema) */
+    main::-webkit-scrollbar{ height:10px; width:10px; }
+    main::-webkit-scrollbar-track{ background:transparent; }
+    main::-webkit-scrollbar-thumb{ background:var(--border); border-radius:999px; }
+    /* scrollbar del sidebar (combina con el fondo oscuro del menú) */
+    .sidebar-scroll::-webkit-scrollbar{ width:6px; }
+    .sidebar-scroll::-webkit-scrollbar-track{ background:transparent; margin:6px 0; }
+    .sidebar-scroll::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.14); border-radius:999px; }
+    .sidebar-scroll:hover::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.24); }
+  </style>
+</head>
+<body class="font-sans antialiased" x-data="shell()" x-init="initTheme()">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar desktop -->
+    <aside class="hidden md:flex md:flex-col w-64 shrink-0 text-side-text" style="background:var(--side-bg)">
+      {% include "_sidebar_content.html" %}
+    </aside>
+
+    <!-- Sidebar móvil (drawer) -->
+    <div x-show="sidebarOpen" x-cloak class="md:hidden fixed inset-0 z-40">
+      <div class="absolute inset-0 bg-black/50" @click="sidebarOpen=false"></div>
+      <aside class="absolute left-0 top-0 h-full w-64 flex flex-col text-side-text" style="background:var(--side-bg)"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0">
+        {% include "_sidebar_content.html" %}
+      </aside>
+    </div>
+
+    <!-- Columna principal -->
+    <div class="flex-1 flex flex-col min-w-0">
+      {% include "_topbar.html" %}
+      <!-- banda de acento: solo identifica las vistas Admin (guindo) y Developer (morado) -->
+      <div class="h-1" x-show="activeView==='admin' || activeView==='developer'" x-cloak style="background:var(--accent-view)"></div>
+      <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function shell(){
+      return {
+        dark:false, sidebarOpen:false, lang:'ES',
+        activeView:'agencia',
+        initTheme(){
+          this.dark = localStorage.getItem('eq-theme') === 'dark';
+          this.applyTheme();
+        },
+        applyTheme(){
+          document.documentElement.classList.toggle('theme-dark', this.dark);
+          document.documentElement.classList.toggle('theme-light', !this.dark);
+        },
+        toggleTheme(){ this.dark=!this.dark; localStorage.setItem('eq-theme', this.dark?'dark':'light'); this.applyTheme(); },
+        toggleLang(){ this.lang = this.lang==='ES'?'EN':'ES'; },
+        setView(key, accent){ this.activeView=key; document.documentElement.style.setProperty('--accent-view', accent); },
+      };
+    }
+  </script>
+</body>
+</html>

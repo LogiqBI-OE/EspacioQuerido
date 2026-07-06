@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<!-- ===== Barra de filtros ===== -->
+<div class="bg-card border border-border rounded-2xl p-3 mb-3">
+  <div class="flex flex-wrap gap-2 items-end">
+    <div class="min-w-[110px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Año</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Año actual</option><option>2025</option><option>2024</option></select>
+    </div>
+    <div class="min-w-[110px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Mes</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Mes actual</option><option>Junio</option><option>Mayo</option></select>
+    </div>
+    <div class="min-w-[120px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Status de pago</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Todos</option><option>Facturado</option><option>Por cobrar</option></select>
+    </div>
+    <div class="min-w-[120px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Asesor</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Todos</option><option>Pamela Martinez</option></select>
+    </div>
+    <div class="min-w-[110px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Team</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Todos</option></select>
+    </div>
+    <div class="min-w-[120px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Tipo de operación</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Todos</option><option>Venta</option><option>Renta</option></select>
+    </div>
+    <div class="min-w-[120px]">
+      <label class="text-[10px] uppercase tracking-wide text-muted">Ubicación</label>
+      <select class="mt-0.5 w-full text-sm rounded-lg bg-elevated/60 border border-border px-2.5 py-1.5"><option>Todas</option><option>Monterrey</option><option>San Pedro</option></select>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Dashboard con navegación horizontal (tabs) ===== -->
+<div class="bg-card border border-border rounded-2xl"
+     x-data="{tab:'cierres', done:{}, go(t){ this.tab=t; this.$nextTick(()=>{ if(!this.done[t]){ renderTab(t); this.done[t]=true } }) }}"
+     x-init="$nextTick(()=>{ renderTab('cierres'); done['cierres']=true })">
+  <div class="flex gap-1 px-3 pt-3 border-b border-border overflow-x-auto">
+    <template x-for="t in [['cierres','Cierres'],['cobrar','Por cobrar'],['separacion','En separación'],['ofrec','Ofrecimiento'],['faq','Soporte & FAQ']]" :key="t[0]">
+      <button @click="go(t[0])" class="px-3 py-2 text-sm whitespace-nowrap" :class="tab===t[0] ? 'font-medium border-b-2' : 'text-muted'" :style="tab===t[0] ? 'border-color:var(--accent-view); color:var(--accent-view)' : ''" x-text="t[1]"></button>
+    </template>
+  </div>
+
+  <!-- Cierres -->
+  <div x-show="tab==='cierres'" class="p-4">
+    <div class="grid grid-cols-2 lg:grid-cols-6 gap-2.5 mb-4">
+      {% for k in kpis %}<div class="bg-elevated/50 border border-border rounded-xl p-3"><div class="text-[11px] text-muted">{{ k.label }}</div><div class="text-lg font-semibold mt-0.5">{{ k.value }}</div></div>{% endfor %}
+    </div>
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="border border-border rounded-xl p-3"><div class="text-sm font-medium mb-1">Cumplimiento de venta</div><div id="ch-gauge"></div></div>
+      <div class="border border-border rounded-xl p-3"><div class="text-sm font-medium mb-1">Top asesores</div><div id="ch-top"></div></div>
+      <div class="border border-border rounded-xl p-3"><div class="text-sm font-medium mb-1">Tendencia (semana)</div><div id="ch-tend"></div></div>
+    </div>
+    <div class="border border-border rounded-xl p-3 mt-4">
+      <div class="text-sm font-medium mb-2">Pipeline funnel</div>
+      <div class="space-y-1.5">
+        {% for label, val in funnel %}
+          <div class="flex items-center gap-2"><span class="w-24 text-xs text-muted">{{ label }}</span>
+            <div class="flex-1 h-6 rounded bg-elevated overflow-hidden"><div class="h-full rounded grid place-items-end px-2 text-[11px] text-white" style="background:var(--accent-view); width:{% widthratio val 3.1 100 %}%">{{ val }}M</div></div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Por cobrar -->
+  <div x-show="tab==='cobrar'" x-cloak class="p-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+      <div class="bg-elevated/50 border border-border rounded-xl p-3"><div class="text-[11px] text-muted">Total operaciones</div><div class="text-lg font-semibold">30</div></div>
+      <div class="bg-elevated/50 border border-border rounded-xl p-3"><div class="text-[11px] text-muted">Por cobrar</div><div class="text-lg font-semibold">$3.1M</div></div>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-4">
+      <div class="border border-border rounded-xl p-3"><div class="text-sm font-medium mb-1">Comisión por cobrar · por asesor</div><div id="ch-cobrar"></div></div>
+      <div class="border border-border rounded-xl p-3 overflow-x-auto"><div class="text-sm font-medium mb-2">Detalle (urgencia por días de separación)</div>{% include "_tabla_ops.html" with rows=por_cobrar_detalle sep=True %}</div>
+    </div>
+  </div>
+
+  <!-- En separación -->
+  <div x-show="tab==='separacion'" x-cloak class="p-4 overflow-x-auto">
+    {% include "_tabla_ops.html" with rows=separacion_detalle sep=True %}
+  </div>
+
+  <!-- Ofrecimiento -->
+  <div x-show="tab==='ofrec'" x-cloak class="p-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+      <div class="bg-elevated/50 border border-border rounded-xl p-3"><div class="text-[11px] text-muted">Total operaciones</div><div class="text-lg font-semibold">25</div></div>
+      <div class="bg-elevated/50 border border-border rounded-xl p-3"><div class="text-[11px] text-muted">Ofrecimiento</div><div class="text-lg font-semibold">$2.4M</div></div>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-4">
+      <div class="border border-border rounded-xl p-3"><div class="text-sm font-medium mb-1">Operaciones en ofrecimiento · por asesor</div><div id="ch-ofrec"></div></div>
+      <div class="border border-border rounded-xl p-3 overflow-x-auto"><div class="text-sm font-medium mb-2">Detalles de operación</div>{% include "_tabla_ops.html" with rows=ofrecimiento_detalle sep=False %}</div>
+    </div>
+  </div>
+
+  <!-- Soporte & FAQ -->
+  <div x-show="tab==='faq'" x-cloak class="p-5 max-w-2xl">
+    <div class="text-sm font-medium mb-2">Soporte & FAQ del reporte</div>
+    <p class="text-sm text-muted">¿Qué significa cada ángulo? <b>Cierres</b> = operaciones facturadas del mes. <b>Por cobrar</b> = comisión pendiente de cobro (más urgente entre más días lleva separada la propiedad). <b>En separación</b> = seguimiento de firma. <b>Ofrecimiento</b> = operaciones en oferta.</p>
+  </div>
+</div>
+
+<script>
+  const ACCENT = getComputedStyle(document.documentElement).getPropertyValue('--accent-operativa').trim() || '#4f46e5';
+  const baseOpts = { chart:{ toolbar:{show:false}, fontFamily:'inherit' }, dataLabels:{enabled:false}, grid:{borderColor:'rgba(128,128,128,.15)'} };
+  function hbar(el, names, vals, color){
+    new ApexCharts(document.querySelector(el), { ...baseOpts,
+      chart:{...baseOpts.chart, type:'bar', height: Math.max(180, names.length*24)},
+      series:[{name:'Comisión (K)', data:vals}],
+      plotOptions:{bar:{horizontal:true, borderRadius:3, barHeight:'62%'}},
+      colors:[color], xaxis:{categories:names, labels:{style:{fontSize:'11px'}}}, yaxis:{labels:{style:{fontSize:'11px'}}},
+    }).render();
+  }
+  function renderTab(t){
+    if(t==='cierres'){
+      new ApexCharts(document.querySelector('#ch-gauge'), { ...baseOpts, chart:{...baseOpts.chart, type:'radialBar', height:230}, series:[{{ cumplimiento }}], colors:[ACCENT], plotOptions:{radialBar:{hollow:{size:'60%'}, dataLabels:{value:{show:true, fontSize:'22px', formatter:v=>v+'%'}, name:{show:true, offsetY:18, fontSize:'12px', formatter:()=>'$1,297K'}}}}, labels:['Cumplimiento'] }).render();
+      hbar('#ch-top', [{% for n,v in top_asesores %}'{{ n }}',{% endfor %}], [{% for n,v in top_asesores %}{{ v }},{% endfor %}], ACCENT);
+      new ApexCharts(document.querySelector('#ch-tend'), { ...baseOpts, chart:{...baseOpts.chart, type:'bar', height:230}, series:[{name:'Comisión (K)', data:[{% for n,v in tendencia %}{{ v }},{% endfor %}]}], plotOptions:{bar:{borderRadius:4, columnWidth:'50%'}}, colors:[ACCENT], xaxis:{categories:[{% for n,v in tendencia %}'{{ n }}',{% endfor %}], labels:{style:{fontSize:'11px'}}} }).render();
+    } else if(t==='cobrar'){ hbar('#ch-cobrar', [{% for n,v in por_cobrar_asesor %}'{{ n }}',{% endfor %}], [{% for n,v in por_cobrar_asesor %}{{ v }},{% endfor %}], '#be123c'); }
+    else if(t==='ofrec'){ hbar('#ch-ofrec', [{% for n,v in ofrecimiento_asesor %}'{{ n }}',{% endfor %}], [{% for n,v in ofrecimiento_asesor %}{{ v }},{% endfor %}], ACCENT); }
+  }
+</script>
+{% endblock %}

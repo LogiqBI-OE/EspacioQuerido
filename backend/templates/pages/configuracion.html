@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-5">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="max-w-2xl space-y-4">
+  <div class="bg-card border border-border rounded-2xl p-4">
+    <div class="text-sm font-medium mb-3">Agencia</div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-[11px] uppercase tracking-wide text-muted">Nombre de la agencia</label>
+        <input type="text" value="MONTERREY1" class="mt-1 w-full px-3 py-2 text-sm rounded-lg bg-elevated/60 border border-border focus:outline-none focus:border-accent" />
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div>
+          <label class="text-[11px] uppercase tracking-wide text-muted">Zona horaria</label>
+          <input type="text" value="America/Monterrey" class="mt-1 w-full px-3 py-2 text-sm rounded-lg bg-elevated/60 border border-border" />
+        </div>
+        <div>
+          <label class="text-[11px] uppercase tracking-wide text-muted">Moneda</label>
+          <input type="text" value="MXN" class="mt-1 w-full px-3 py-2 text-sm rounded-lg bg-elevated/60 border border-border" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-card border border-border rounded-2xl p-4">
+    <div class="text-sm font-medium mb-3">Etapas del pipeline</div>
+    <div class="flex flex-wrap gap-2">
+      <span class="text-xs px-2.5 py-1 rounded-full bg-elevated text-muted">Nuevos</span>
+      <span class="text-xs px-2.5 py-1 rounded-full bg-elevated text-muted">Calificados</span>
+      <span class="text-xs px-2.5 py-1 rounded-full bg-elevated text-muted">Citas</span>
+      <span class="text-xs px-2.5 py-1 rounded-full bg-elevated text-muted">Negociación</span>
+      <span class="text-xs px-2.5 py-1 rounded-full bg-elevated text-muted">Cierre</span>
+      <span class="text-xs px-2.5 py-1 rounded-full bg-elevated text-muted">Reactivación</span>
+    </div>
+  </div>
+
+  <div class="flex justify-end">
+    <button class="px-4 py-2 rounded-lg text-white text-sm font-medium" style="background:var(--accent-view)">Guardar cambios</button>
+  </div>
+</div>
+{% endblock %}

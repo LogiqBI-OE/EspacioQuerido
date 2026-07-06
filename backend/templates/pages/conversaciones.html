@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="text-lg font-semibold">{{ page_title }}</h1>
+  <p class="text-sm text-muted">{{ page_subtitle }}</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_300px] gap-3 h-[calc(100vh-190px)]">
+
+  <!-- lista de chats -->
+  <div class="bg-card border border-border rounded-2xl overflow-hidden flex flex-col">
+    <div class="p-3 border-b border-border">
+      <input type="text" placeholder="Buscar…" class="w-full px-3 py-2 text-sm rounded-lg bg-elevated/60 border border-border focus:outline-none focus:border-accent" />
+    </div>
+    <div class="flex-1 overflow-y-auto">
+      {% for ch in chats %}
+        <div class="flex gap-3 px-3 py-2.5 border-b border-border cursor-pointer {% if forloop.first %}bg-elevated{% else %}hover:bg-elevated/60{% endif %}">
+          <div class="h-9 w-9 shrink-0 rounded-full grid place-items-center text-white text-xs font-semibold" style="background:var(--accent-view)">{{ ch.nombre|slice:":1" }}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm font-medium truncate">{{ ch.nombre }}</span>
+              <span class="text-[10px] text-muted shrink-0">{{ ch.hora }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[12px] text-muted truncate">{{ ch.ultimo }}</span>
+              {% if ch.no_leidos %}<span class="ml-auto shrink-0 text-[10px] text-white rounded-full px-1.5" style="background:var(--accent-view)">{{ ch.no_leidos }}</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- hilo -->
+  <div class="bg-card border border-border rounded-2xl overflow-hidden flex flex-col">
+    <div class="px-4 py-3 border-b border-border flex items-center gap-3">
+      <div class="h-9 w-9 rounded-full grid place-items-center text-white text-xs font-semibold" style="background:var(--accent-view)">L</div>
+      <div><div class="text-sm font-medium">Laura Mendoza</div><div class="text-[11px] text-muted">WhatsApp · en línea</div></div>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-3">
+      {% for m in hilo %}
+        <div class="flex {% if m.de == 'asesor' %}justify-end{% endif %}">
+          <div class="max-w-[75%] rounded-2xl px-3 py-2 text-sm {% if m.de == 'asesor' %}text-white{% else %}bg-elevated{% endif %}" {% if m.de == 'asesor' %}style="background:var(--accent-view)"{% endif %}>
+            {{ m.texto }}
+            <div class="text-[10px] mt-0.5 {% if m.de == 'asesor' %}text-white/70{% else %}text-muted{% endif %}">{{ m.hora }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <!-- respuesta sugerida por IA -->
+    <div class="p-3 border-t border-border">
+      <div class="rounded-xl border border-border p-3" style="background:color-mix(in srgb, var(--accent-view) 7%, transparent)">
+        <div class="flex items-center gap-2 text-[11px] font-medium mb-1.5">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" style="color:var(--accent-view)"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/></svg>
+          Respuesta sugerida
+          <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">confianza {{ confianza }}%</span>
+        </div>
+        <p class="text-sm mb-2">{{ sugerencia }}</p>
+        <div class="flex gap-2">
+          <button class="text-[12px] px-3 py-1.5 rounded-lg text-white" style="background:var(--accent-view)">Aprobar y enviar</button>
+          <button class="text-[12px] px-3 py-1.5 rounded-lg border border-border hover:bg-elevated">Ajustar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- perfil del lead -->
+  <div class="bg-card border border-border rounded-2xl overflow-y-auto p-4 hidden lg:block">
+    <div class="text-center">
+      <div class="h-14 w-14 mx-auto rounded-full grid place-items-center text-white font-semibold" style="background:var(--accent-view)">L</div>
+      <div class="mt-2 font-medium">Laura Mendoza</div>
+      <div class="text-[11px] text-muted">Fuente: WhatsApp</div>
+    </div>
+    <!-- scoring destacado -->
+    <div class="grid grid-cols-2 gap-2 mt-4">
+      <div class="border border-border rounded-xl p-2.5 text-center">
+        <div class="text-[10px] text-muted">Calificación</div>
+        <div class="text-xl font-bold text-emerald-600">A</div>
+        <div class="text-[10px] text-muted">82/100</div>
+      </div>
+      <div class="border border-border rounded-xl p-2.5 text-center">
+        <div class="text-[10px] text-muted">Temperatura</div>
+        <div class="mt-1"><span class="text-[12px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Caliente</span></div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2 text-sm">
+      <div><div class="text-[11px] uppercase tracking-wide text-muted">Qué busca</div>Depto 2 rec · San Pedro · ~20 mdp</div>
+      <div><div class="text-[11px] uppercase tracking-wide text-muted">Comportamiento</div>Responde rápido, pidió visita</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
